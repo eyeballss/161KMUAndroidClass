@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
     //로그인 버튼 클릭하면
     public void loginBtnOnClick(View v){
         //연결을 시도함.
-        httpConnection.connect("http://52.79.190.209/test.php", "user_pword", "ServerTest0428", this);
+        httpConnection.connect("http://52.79.190.209/test.php", "user_pword", "ServerTest0504", this);
         Log.d("LoginActivity", "call http connection");
 
 
@@ -72,8 +72,9 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Extract data included in the Intent
-            String message = intent.getStringExtra("key");
-            Log.d("receiver", "Got message: " + message);
+            String message = intent.getStringExtra("user_pword");
+
+//            Log.d("receiver", "Got message: " + message);
         }
     };
 

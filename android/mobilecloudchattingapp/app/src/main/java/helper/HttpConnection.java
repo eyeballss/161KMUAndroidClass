@@ -76,7 +76,7 @@ public class HttpConnection {
         protected void onPostExecute(Object o) { //쓰레드가 끝난 후에 처리하는 작업
 
             //일이 끝난 후에 브로드캐스트 한다.
-            staticManager.sendBroadcast(context, "httpConnection", "key", "val");
+            staticManager.sendBroadcast(context, "httpConnection", key, result); //key는 같이 씀
 
 
 //            staticManager.httpResult("key", result); //스태틱 매니저의 httpResult에 넣어줌.
