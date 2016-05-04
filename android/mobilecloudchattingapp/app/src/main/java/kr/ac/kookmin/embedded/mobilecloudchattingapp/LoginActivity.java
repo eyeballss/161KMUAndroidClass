@@ -29,6 +29,7 @@ import helper.StaticManager;
  *  - TDD
  *  - makeing flow chart
  *  - naming rule
+ *  - access modifier
  */
 
 
@@ -52,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         pwEditTxt=(EditText)findViewById(R.id.pwEditTxt);
         loginBtn=(Button)findViewById(R.id.loginBtn);
         httpConnection=new HttpConnection(); //http 컨넥터 만들기
+        StaticManager.applicationContext=getApplicationContext(); //어플리케이션 콘텍스트 넘김.
 
 
         Intent in = new Intent(LoginActivity.this, EditProfileActivity.class);
@@ -65,7 +67,7 @@ public class LoginActivity extends AppCompatActivity {
     //로그인 버튼 클릭하면
     public void loginBtnOnClick(View v){
         //연결을 시도함.
-        httpConnection.connect("http://52.79.190.209/test.php", "user_pword", "ServerTest0504", this);
+        httpConnection.connect("http://52.79.190.209/test.php", "user_pword", "ServerTest0504");
 
         Log.d("LoginActivity", "call http connection");
 
@@ -87,7 +89,7 @@ public class LoginActivity extends AppCompatActivity {
             final String message = intent.getStringExtra("user_pword");
 
             //토스트 메세지로 테스트
-            StaticManager.testToastMsg(getApplicationContext(), message);
+            StaticManager.testToastMsg(message);
 
             Log.d("LoginActivity", "local broadcast receiver works");
         }

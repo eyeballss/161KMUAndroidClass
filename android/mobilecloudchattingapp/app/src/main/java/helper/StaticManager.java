@@ -12,22 +12,23 @@ import android.widget.Toast;
 //static 변수들이나 static 메소드들을 갖고 있음.
 public class StaticManager {
 
+    public static Context applicationContext;
     public static String nickname;
     public static String comment;
     public static boolean sex; //F면 여자 T이면 남자
 
     //로컬 브로드캐스트
-    public static void sendBroadcast(Context context, String intentName, String key, String data) {
+    public static void sendBroadcast(String intentName, String key, String data) {
         Intent intent = new Intent(intentName);
         intent.putExtra(key, data);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent);
     }
 
     //테스트용 토스트 메세지
-    public static void testToastMsg(final Context context, final String string){
+    public static void testToastMsg(final String string){
         new Handler().post(new Runnable() {
             public void run() {
-                Toast.makeText(context, string, Toast.LENGTH_SHORT).show();
+                Toast.makeText(applicationContext, string, Toast.LENGTH_SHORT).show();
             }
         });
     }

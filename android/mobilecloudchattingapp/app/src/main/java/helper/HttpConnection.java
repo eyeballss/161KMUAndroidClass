@@ -41,18 +41,18 @@ public class HttpConnection {
     }
     private void setContext(Context con) {context = con; }
 
-    public void connect(String url, String key, String value, Context con){
+    public void connect(String url, String key, String value){//}, Context con){
         asykTsk = new BackgroundTask(); //AsyncTask 생성. 왜냐면 asyncTask는 재사용이 불가능(하다고 이해한게 맞는지 모르겠음)
 
         setURL(url);
         setKey(key);
         setValue(value);
-        setContext(con);
+        setContext(StaticManager.applicationContext);
         Log.d("http connection", "connect method call");
         Log.d("http connection", "url : " + url);
         Log.d("http connection", "key : " + key);
         Log.d("http connection", "value : " + value);
-        Log.d("http connection", "context : " + con);
+        Log.d("http connection", "context : " + context);
 
         asykTsk.execute(); //AsyncTask를 실행함!
     }
@@ -77,7 +77,7 @@ public class HttpConnection {
         protected void onPostExecute(Object o) { //쓰레드가 끝난 후에 처리하는 작업
 
             //일이 끝난 후에 브로드캐스트 한다.
-            StaticManager.sendBroadcast(context, "localBroadCast", key, result); //key는 같이 씀
+            StaticManager.sendBroadcast("localBroadCast", key, result); //key는 같이 씀
 
 
 //            staticManager.httpResult("key", result); //스태틱 매니저의 httpResult에 넣어줌.
