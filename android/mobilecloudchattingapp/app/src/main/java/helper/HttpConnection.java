@@ -22,11 +22,10 @@ public class HttpConnection {
     BackgroundTask asykTsk; //어싱크태스크
     ArrayList<HttpQue> sBuffer; //http 통신 버퍼
     private String ServerURL, key, value, result="null"; //값 들. result는 http 통신으로 받은 결과값
-    StaticManager staticManager = new StaticManager(); //스태틱 매니저
+//    StaticManager staticManager = new StaticManager(); //스태틱 매니저
     Context context; //브로드캐스트를 위한 Context
 
     public HttpConnection(){ //생성자
-        asykTsk = new BackgroundTask(); //AsyncTask 생성
         sBuffer= new ArrayList<HttpQue>(); //http 연결을 위한 버퍼 생성
         Log.d("http connection","creator");
     }
@@ -43,6 +42,8 @@ public class HttpConnection {
     private void setContext(Context con) {context = con; }
 
     public void connect(String url, String key, String value, Context con){
+        asykTsk = new BackgroundTask(); //AsyncTask 생성. 왜냐면 asyncTask는 재사용이 불가능(하다고 이해한게 맞는지 모르겠음)
+
         setURL(url);
         setKey(key);
         setValue(value);
@@ -76,7 +77,7 @@ public class HttpConnection {
         protected void onPostExecute(Object o) { //쓰레드가 끝난 후에 처리하는 작업
 
             //일이 끝난 후에 브로드캐스트 한다.
-            staticManager.sendBroadcast(context, "httpConnection", key, result); //key는 같이 씀
+            StaticManager.sendBroadcast(context, "localBroadCast", key, result); //key는 같이 씀
 
 
 //            staticManager.httpResult("key", result); //스태틱 매니저의 httpResult에 넣어줌.
@@ -92,10 +93,10 @@ public class HttpConnection {
 
 
 
-    //실행 중인지 아닌지를 판별함.
-    public AsyncTask.Status statusAsyncTask(){
-        return asykTsk.getStatus();
-    }
+//    //실행 중인지 아닌지를 판별함. 그때 그때 만들게 되버려서 이렇게 할 수 없게 됨!
+//    public AsyncTask.Status statusAsyncTask(){
+//        return asykTsk.getStatus();
+//    }
 
 
 

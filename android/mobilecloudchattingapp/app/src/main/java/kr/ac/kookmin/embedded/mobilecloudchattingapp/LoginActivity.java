@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -22,9 +21,21 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import helper.HttpConnection;
+import helper.StaticManager;
 
 /**
- * A login screen that offers login via email/password.
+ * Don't forget:
+ *  - makeing Log at method
+ *  - TDD
+ *  - makeing flow chart
+ *  - naming rule
+ */
+
+
+/**
+ * Main screen that client sees first
+ * A login screen that offers login.
+ *
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -40,59 +51,59 @@ public class LoginActivity extends AppCompatActivity {
         idEditTxt=(EditText)findViewById(R.id.idEditTxt);
         pwEditTxt=(EditText)findViewById(R.id.pwEditTxt);
         loginBtn=(Button)findViewById(R.id.loginBtn);
+        httpConnection=new HttpConnection(); //http 컨넥터 만들기
 
-        httpConnection=new HttpConnection();
 
-
-//        Intent in = new Intent(LoginActivity.this, MainActivity.class);
-//        startActivity(in);
+        Intent in = new Intent(LoginActivity.this, EditProfileActivity.class);
+        startActivity(in);
 
 
 //        checkDangerousPermissions();
-    }
+    }//onCreate
 
 
     //로그인 버튼 클릭하면
     public void loginBtnOnClick(View v){
         //연결을 시도함.
         httpConnection.connect("http://52.79.190.209/test.php", "user_pword", "ServerTest0504", this);
+
         Log.d("LoginActivity", "call http connection");
 
+//        startLocationService();
+    }//loginBtnOnClick
 
-        if(httpConnection.statusAsyncTask() == AsyncTask.Status.FINISHED){
 
-        }
 
-//                Toast.makeText(getApplicationContext(), result+"!!", Toast.LENGTH_SHORT).show();
-//                startLocationService();
-    }
+
+
+
+    //아래는 로컬 브로드캐스트
 
     //브로드캐스트 리시버
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Extract data included in the Intent
-            String message = intent.getStringExtra("user_pword");
+            final String message = intent.getStringExtra("user_pword");
 
-//            Log.d("receiver", "Got message: " + message);
+            //토스트 메세지로 테스트
+            StaticManager.testToastMsg(getApplicationContext(), message);
+
+            Log.d("LoginActivity", "local broadcast receiver works");
         }
     };
 
-
-
-
-
-
     public void onResume() {
         super.onResume();
-
+        //이것도 나중에 스태틱으로 바꿔주자. 여기서 특별히 다르게 처리해야 할 것은 없으니까.
         // Register mMessageReceiver to receive messages. 브로드캐스트 리시버 등록
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("httpConnection"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocalBroadcastReceiver, new IntentFilter("localBroadCast"));
     }
 
     protected void onPause() {
+        //이것도 나중에 스태틱으로 바꿔주자. 여기서 특별히 다르게 처리해야 할 것은 없으니까.
         // Unregister since the activity is not visible 브로드캐스트 리비서 해제
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocalBroadcastReceiver);
         super.onPause();
     }
 
