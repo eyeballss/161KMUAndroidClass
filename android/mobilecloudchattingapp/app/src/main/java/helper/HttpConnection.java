@@ -19,14 +19,15 @@ import java.util.ArrayList;
  */
 public class HttpConnection {
 
-    BackgroundTask asykTsk; //어싱크태스크
-    ArrayList<HttpQue> sBuffer; //http 통신 버퍼
+    private BackgroundTask asykTsk; //어싱크태스크
+    private ArrayList<HttpQue> sBuffer; //http 통신 버퍼
     private String ServerURL, key, value, result="null"; //값 들. result는 http 통신으로 받은 결과값
 //    StaticManager staticManager = new StaticManager(); //스태틱 매니저
-    Context context; //브로드캐스트를 위한 Context
+    private Context context; //브로드캐스트를 위한 Context
 
     public HttpConnection(){ //생성자
         sBuffer= new ArrayList<HttpQue>(); //http 연결을 위한 버퍼 생성
+        context = StaticManager.applicationContext;
         Log.d("http connection","creator");
     }
 
@@ -39,7 +40,7 @@ public class HttpConnection {
     private void setURL(String url){
         ServerURL=url;
     }
-    private void setContext(Context con) {context = con; }
+//    private void setContext(Context con) {context = con; } //괜히 있는 거임
 
     public void connect(String url, String key, String value){//}, Context con){
         asykTsk = new BackgroundTask(); //AsyncTask 생성. 왜냐면 asyncTask는 재사용이 불가능(하다고 이해한게 맞는지 모르겠음)
@@ -47,7 +48,7 @@ public class HttpConnection {
         setURL(url);
         setKey(key);
         setValue(value);
-        setContext(StaticManager.applicationContext);
+//        setContext(StaticManager.applicationContext);
         Log.d("http connection", "connect method call");
         Log.d("http connection", "url : " + url);
         Log.d("http connection", "key : " + key);
@@ -71,24 +72,16 @@ public class HttpConnection {
         }
 
         @Override
-        protected void onPreExecute() { super.onPreExecute(); } //쓰레드 시작 전에 미리 처리해야 하는 작업
-
-        @Override
         protected void onPostExecute(Object o) { //쓰레드가 끝난 후에 처리하는 작업
 
             //일이 끝난 후에 브로드캐스트 한다.
-            StaticManager.sendBroadcast("localBroadCast", key, result); //key는 같이 씀
+            StaticManager.sendBroadcast(key, result); //key는 같이 씀
 
 
 //            staticManager.httpResult("key", result); //스태틱 매니저의 httpResult에 넣어줌.
 
             super.onPostExecute(o);
         }
-
-        @Override
-        protected void onProgressUpdate(Object[] values) {
-            super.onProgressUpdate(values);
-        } //쓰레드 중간에 처리하는 작업
     }
 
 
