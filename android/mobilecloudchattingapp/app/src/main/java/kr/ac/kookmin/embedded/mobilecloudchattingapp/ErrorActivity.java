@@ -13,6 +13,6 @@ public class ErrorActivity extends AppCompatActivity {
         setContentView(R.layout.act_error);
 
 
-        message.confirmMsgShow(this, "에러가 났으니 처음 화면으로 돌아갑니다.");
+        message.okayMsgShow("에러가 났으니 처음 화면으로 돌아갑니다.");
     }
 }

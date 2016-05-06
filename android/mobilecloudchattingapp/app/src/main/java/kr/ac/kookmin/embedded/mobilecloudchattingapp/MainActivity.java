@@ -16,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import helper.StaticManager;
+
 public class MainActivity extends AppCompatActivity {
 
     /**
@@ -116,8 +118,6 @@ public class MainActivity extends AppCompatActivity {
                     return "SECTION 1";
                 case 1:
                     return "SECTION 2";
-                case 2:
-                    return "SECTION 3";
             }
             return null;
         }
@@ -149,15 +149,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-//            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+            View rootView;
+            PeopleListTab1Activity tab1 = new PeopleListTab1Activity(StaticManager.applicationContext);
+            ChattingTab2Activity tab2 = new ChattingTab2Activity(StaticManager.applicationContext);
+
+            if(getArguments().getInt(ARG_SECTION_NUMBER) == 2){
+                container.addView(tab2);
+                rootView = tab2.getView();
+//                rootView = inflater.inflate(R.layout.fragment_main_tab1, container, false);
+            }else {
+                container.addView(tab1);
+                rootView = tab1.getView();
+//                rootView = inflater.inflate(R.layout.fragment_main_tab2, container, false);
+            }
+
 //            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 //            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
 
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-
+//            View rootView = inflater.inflate(R.layout.fragment_main_tab1, container, false);
 
             return rootView;
         }

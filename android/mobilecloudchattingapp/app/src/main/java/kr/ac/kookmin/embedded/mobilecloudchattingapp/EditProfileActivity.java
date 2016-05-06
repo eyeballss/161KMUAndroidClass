@@ -15,8 +15,6 @@ public class EditProfileActivity extends AppCompatActivity {
     RadioButton radioManBtn, radioWomanBtn;
     DataSaver dataSaver;
 
-    //저장을 위한 SharedPreference.Editor
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_edit_profile);

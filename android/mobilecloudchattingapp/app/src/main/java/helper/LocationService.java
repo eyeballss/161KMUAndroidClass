@@ -10,18 +10,24 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+
 /**
  * Created by kesl on 2016-05-05.
  */
 public class LocationService {
 
+    LocationManager manager;
+
+
     public LocationService(){ //생성자
         checkDangerousPermissions();
     }
 
+
+
     //GPS 서비스 실행!
     public void startLocationService() {
-        LocationManager manager = StaticManager.locationManager;
+        manager = StaticManager.locationManager;
 
         GPSListener gpsListener = new GPSListener();
         long minTime = 10000; //이 시간(10000ms= 10초)이 지나면 GPS를 업데이트 해주세요.
@@ -48,7 +54,7 @@ public class LocationService {
 
                 Log.i("GPSListener", "최근 위도 경도 : "+latitude+" "+longitude);
 
-                StaticManager.testToastMsg("위도 경도 : "+latitude+" "+longitude);
+                StaticManager.testToastMsg("최근 위도 경도 : "+latitude+" "+longitude);
             }
         } catch(SecurityException ex) {
             ex.printStackTrace();
@@ -56,7 +62,41 @@ public class LocationService {
 
         Log.d("GPS Location", "startLocationService() success");
 
-    }
+    }//startLocationService
+
+
+
+//    //GPS 현재 사용할 수 있는지 없는지 체크해주는 메소드였으나 manager.isProviderEnabled(LocationManager.GPS_PROVIDER)에서 NullPointException 오류로 구현 보류.
+//    public void enableGPS(){
+//        boolean test = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+//        StaticManager.testToastMsg(test+"");
+////            if(!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){ //만약 사용중이지 않다면
+////                buildAlertMessageNoGps(); //buildAlertMessageNoGps 메소드 실행.
+////            }
+//    }
+//    private void buildAlertMessageNoGps() {
+//        final AlertDialog.Builder builder = new AlertDialog.Builder(StaticManager.applicationContext);
+//        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+//                .setCancelable(false)
+//                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+//                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+//                        StaticManager.applicationContext.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+//                    }
+//                })
+//                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+//                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+//                        dialog.cancel();
+//                    }
+//                });
+//        final AlertDialog alert = builder.create();
+//        alert.show();
+//    }
+//    참고 : http://stackoverflow.com/questions/843675/how-do-i-find-out-if-the-gps-of-an-android-device-is-enabled
+
+
+
+
+
 
 
 
@@ -87,22 +127,8 @@ public class LocationService {
                 ActivityCompat.requestPermissions((Activity) StaticManager.applicationContext, permissions, 1);
             }
         }
-    }
-
-//나중에 필요할 것 같으니 우선 한 번만 커밋해두고 지운다.
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-//        if (requestCode == 1) {
-//            for (int i = 0; i < permissions.length; i++) {
-//                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-////                    Toast.makeText(this, permissions[i] + " d", Toast.LENGTH_LONG).show();
-//                } else {
-////                    Toast.makeText(this, permissions[i] + " e", Toast.LENGTH_LONG).show();
-//                }
-//            }
-//        }
-//    }
-}
+    }//checkDangerousPermissions
+}//LocationService
 
 //매니저에게 리퀘스트를 보내기 위해 필요한 리스너 객체의 클래스
 class GPSListener implements LocationListener {

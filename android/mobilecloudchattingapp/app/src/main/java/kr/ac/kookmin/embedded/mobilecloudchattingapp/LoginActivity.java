@@ -41,21 +41,24 @@ public class LoginActivity extends AppCompatActivity {
     EditText idEditTxt, pwEditTxt;
     Button loginBtn;
     HttpConnection httpConnection ;
+    LocationService locationService;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_login);
 
+        StaticManager.applicationContext=getApplicationContext(); //어플리케이션 콘텍스트 넘김.
+        StaticManager.locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);//위치매니저 넘김.
+
         idEditTxt=(EditText)findViewById(R.id.idEditTxt);
         pwEditTxt=(EditText)findViewById(R.id.pwEditTxt);
         loginBtn=(Button)findViewById(R.id.loginBtn);
         httpConnection=new HttpConnection(); //http 컨넥터 만들기
-        StaticManager.applicationContext=getApplicationContext(); //어플리케이션 콘텍스트 넘김.
-        StaticManager.locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);//위치매니저 넘김.
+        locationService = new LocationService(); //GPS 서비스 제공자 만들기
 
 
-//        Intent in = new Intent(LoginActivity.this, EditProfileActivity.class);
-//        startActivity(in);
+        Intent in = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(in);
 
     }//onCreate
 
@@ -63,10 +66,10 @@ public class LoginActivity extends AppCompatActivity {
     //로그인 버튼 클릭하면
     public void loginBtnOnClick(View v){
         //연결을 시도함.
-        httpConnection.connect("http://52.79.190.209/test.php", "user_pword", "ServerTest0505");
+        httpConnection.connect("http://52.79.190.209/test.php", "user_pword", "ServerTest0506");
 
         Log.d("LoginActivity", "call http connection");
-        new LocationService().startLocationService(); //위치 정보 받아옵니다! 그래서 토스트로 출력!
+        locationService.startLocationService(); //위치 정보 받아옵니다! 그래서 토스트로 출력! 이건 테스트 하고 있는 용도임.
 
     }//loginBtnOnClick
 
