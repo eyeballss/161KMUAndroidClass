@@ -1,6 +1,5 @@
 package helper;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -21,39 +20,43 @@ public class HttpConnection {
 
     private BackgroundTask asykTsk; //어싱크태스크
     private ArrayList<HttpQue> sBuffer; //http 통신 버퍼
-    private String ServerURL, key, value, result="null"; //값 들. result는 http 통신으로 받은 결과값
+    private String serverURL, selectPHPName="null", result="null"; //값 들. result는 http 통신으로 받은 결과값
+    private String[] key, value; //key, value 값은 다양하게 올 수 있으므로 배열로 만듦.
 //    StaticManager staticManager = new StaticManager(); //스태틱 매니저
-    private Context context; //브로드캐스트를 위한 Context
+//    private Context context; //브로드캐스트를 위한 Context
 
     public HttpConnection(){ //생성자
         sBuffer= new ArrayList<HttpQue>(); //http 연결을 위한 버퍼 생성
-        context = StaticManager.applicationContext;
+//        context = StaticManager.applicationContext;
         Log.d("http connection","creator");
     }
 
-    private void setKey(String key){ //set key to send to server
+    private void setKey(String[] key){ //set key to send to server
         this.key = key;
     }
-    private void setValue(String value){ //set value to send to server
+    private void setValue(String[] value){ //set value to send to server
         this.value = value;
     }
     private void setURL(String url){
-        ServerURL=url;
+        serverURL =url;
     }
+    private void setPHPname(String name) { selectPHPName = name; }
 //    private void setContext(Context con) {context = con; } //괜히 있는 거임
 
-    public void connect(String url, String key, String value){//}, Context con){
+    public void connect(String url, String phpName, String[] key, String[] value){//}, Context con){
         asykTsk = new BackgroundTask(); //AsyncTask 생성. 왜냐면 asyncTask는 재사용이 불가능(하다고 이해한게 맞는지 모르겠음)
 
         setURL(url);
+        setPHPname(phpName);
         setKey(key);
         setValue(value);
 //        setContext(StaticManager.applicationContext);
         Log.d("http connection", "connect method call");
         Log.d("http connection", "url : " + url);
+        Log.d("http connection", "phpName : " + phpName);
         Log.d("http connection", "key : " + key);
         Log.d("http connection", "value : " + value);
-        Log.d("http connection", "context : " + context);
+//        Log.d("http connection", "context : " + context);
 
         asykTsk.execute(); //AsyncTask를 실행함!
     }
@@ -65,7 +68,7 @@ public class HttpConnection {
         @Override
         protected Object doInBackground(Object[] params) { //쓰레드에서 하는 작업. http 통신해서 결과값 받아오기
             Log.d("http connection", "doInBackground call");
-            result = PostData(); //http 통신을 통해 얻어온 결과가 temp에 저장
+            result = PostData(); //http 통신을 통해 얻어온 결과가 result에 저장
 
             Log.d("http connection", "doInBackground result : "+ result);
             return null;
@@ -75,7 +78,7 @@ public class HttpConnection {
         protected void onPostExecute(Object o) { //쓰레드가 끝난 후에 처리하는 작업
 
             //일이 끝난 후에 브로드캐스트 한다.
-            StaticManager.sendBroadcast(key, result); //key는 같이 씀
+            StaticManager.sendBroadcast(selectPHPName, result); //key는 select를 위해 불렀던 php 페이지 이름이 됨.
 
 
 //            staticManager.httpResult("key", result); //스태틱 매니저의 httpResult에 넣어줌.
@@ -109,8 +112,12 @@ public class HttpConnection {
 //        ArrayList<HttpQue> sBuffer = new ArrayList<HttpQue>();
 
         // ArrayList에 <변수=값> 형태로 저장
-        sBuffer.add(new HttpQue("", ServerURL)); // 서버 URL
-        sBuffer.add(new HttpQue(key, value));   // "" 안의 문자열은
+        sBuffer.add(new HttpQue("", serverURL)); // 서버 URL
+
+        for(int i=0; i<key.length; i++){ //key-value 쌍들을 모두 넣는다.
+            sBuffer.add(new HttpQue(key[i], value[i]));
+        }
+//        sBuffer.add(new HttpQue(key, value));   // "" 안의 문자열은
 //        sBuffer.add(new HttpQue("user_pword", myPWord)); // 서버에 설정된 변수명이다
 //        sBuffer.add(new HttpQue("user_nick", myNick));
 //        sBuffer.add(new HttpQue("user_subject", mySubject));

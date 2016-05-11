@@ -57,8 +57,8 @@ public class LoginActivity extends AppCompatActivity {
         locationService = new LocationService(); //GPS 서비스 제공자 만들기
 
 
-        Intent in = new Intent(LoginActivity.this, MainActivity.class);
-        startActivity(in);
+//        Intent in = new Intent(LoginActivity.this, MainActivity.class);
+//        startActivity(in);
 
     }//onCreate
 
@@ -66,10 +66,13 @@ public class LoginActivity extends AppCompatActivity {
     //로그인 버튼 클릭하면
     public void loginBtnOnClick(View v){
         //연결을 시도함.
-        httpConnection.connect("http://52.79.190.209/test.php", "user_pword", "ServerTest0506");
+        String[] val= {"\""+idEditTxt.getText().toString()+"\"",pwEditTxt.getText().toString()};
+        String[] key= {"id", "pw"};
+        httpConnection.connect("http://52.79.106.222/eyeballs/db_save.php", "db_save.php",key, val);
 
-        Log.d("LoginActivity", "call http connection");
-        locationService.startLocationService(); //위치 정보 받아옵니다! 그래서 토스트로 출력! 이건 테스트 하고 있는 용도임.
+
+//        Log.d("LoginActivity", "call http connection");
+//        locationService.startLocationService(); //위치 정보 받아옵니다! 그래서 토스트로 출력! 이건 테스트 하고 있는 용도임.
 
     }//loginBtnOnClick
 
@@ -85,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Extract data included in the Intent
-            final String message = intent.getStringExtra("user_pword");
+            final String message = intent.getStringExtra("db_save.php");
 
             //토스트 메세지로 테스트
             StaticManager.testToastMsg(message);
