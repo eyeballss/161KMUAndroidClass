@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import helper.HttpConnection;
-import helper.LocationService;
 import helper.StaticManager;
 
 /**
@@ -41,7 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText idEditTxt, pwEditTxt;
     Button loginBtn;
     HttpConnection httpConnection ;
-    LocationService locationService;
+//    LocationService locationService; //여기서 GPS는 실험용이었음. 사실 로그인 화면에 GPS가 있을 이유가 없다.
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         pwEditTxt=(EditText)findViewById(R.id.pwEditTxt);
         loginBtn=(Button)findViewById(R.id.loginBtn);
         httpConnection=new HttpConnection(); //http 컨넥터 만들기
-        locationService = new LocationService(); //GPS 서비스 제공자 만들기
+//        locationService = new LocationService(); //GPS 서비스 제공자 만들기
 
 
 //        Intent in = new Intent(LoginActivity.this, MainActivity.class);
@@ -66,9 +65,19 @@ public class LoginActivity extends AppCompatActivity {
     //로그인 버튼 클릭하면
     public void loginBtnOnClick(View v){
         //연결을 시도함.
-        String[] val= {"\""+idEditTxt.getText().toString()+"\"",pwEditTxt.getText().toString()};
-        String[] key= {"id", "pw"};
-        httpConnection.connect("http://52.79.106.222/eyeballs/db_save.php", "db_save.php",key, val);
+        //아이디+비밀번호 문자열을 해쉬코드로 넘김.
+        int temp = (idEditTxt.getText().toString()+""+pwEditTxt.getText().toString()).hashCode();
+//        if(temp<0) temp*=-1; //음수가 되면 양수로 넘겨주려고 했으나 딱히 그럴 필요가 없다는 걸 깨달았다.
+
+
+        //key-value를 String[]으로 만듦.
+        String[] key= {"idpw"};
+        String[] val= {
+                String.valueOf(temp)
+        };
+//        httpConnection.connect("http://52.79.106.222/eyeballs/db_save.php", "db_save.php",key, val);
+        //db_login.php에 로그인 요청을 보냄. 결과는 브로드캐스트 리비서에서 받을 것임.
+        httpConnection.connect("http://52.79.106.222/eyeballs/db_login.php", "db_login.php",key, val);
 
 
 //        Log.d("LoginActivity", "call http connection");
@@ -81,17 +90,23 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
-    //아래는 로컬 브로드캐스트
-
-    //브로드캐스트 리시버
+    //아래는 로컬     //브로드캐스트 리시버
     private BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Extract data included in the Intent
-            final String message = intent.getStringExtra("db_save.php");
+            // db_login.php로 보낸 결과값을 여기서 받음.
+            final String message = intent.getStringExtra("db_login.php");
 
-            //토스트 메세지로 테스트
-            StaticManager.testToastMsg(message);
+            Intent in;
+            if(message.equals("false")) { //로그인에 실패하면 바로 가입을 위해 EidtProfileActivity로 이동
+                in = new Intent(LoginActivity.this, EditProfileActivity.class);
+            }else{ //로그인에 성공하면 MainActivity로 이동.
+                in = new Intent(LoginActivity.this, MainActivity.class);
+                in.putExtra("messageFromServer", message);
+            }
+
+            startActivity(in);
+
 
             Log.d("LoginActivity", "local broadcast receiver works");
         }

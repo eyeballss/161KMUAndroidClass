@@ -19,6 +19,7 @@ public class PeopleListTab1Activity extends LinearLayout {
     private void work() {
         TextView text = (TextView)findViewById(R.id.section_label1);
         text.setText("1111111111");
+
     }
 
 
