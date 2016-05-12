@@ -28,9 +28,6 @@ public class DataSaver {
     public void setData(String key, long val){
         editor.putLong(key, val);
     }
-    public void commit(){
-        editor.commit();
-    }
 
     public String getData(String key, String def){
         return pref.getString(key, def);
@@ -46,6 +43,9 @@ public class DataSaver {
     }
 
 
+    public void commit(){
+        editor.commit();
+    }
 
 
 }
