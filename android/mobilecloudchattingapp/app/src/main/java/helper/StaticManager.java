@@ -19,7 +19,7 @@ public class StaticManager {
     public static String nickname;
     public static String comment;
     public static boolean sex; //F면 여자 T이면 남자
-
+    public static boolean checkIfSMHasProfile=false; //개인 정보를 staticManager가 갖고 있다면 true 아니면 false
 
 
     public static Context applicationContext;
