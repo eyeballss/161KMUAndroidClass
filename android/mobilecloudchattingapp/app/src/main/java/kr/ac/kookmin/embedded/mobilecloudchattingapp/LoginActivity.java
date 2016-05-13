@@ -81,22 +81,14 @@ public class LoginActivity extends AppCompatActivity {
         }
         //연결을 시도함.
         //아이디+비밀번호 문자열을 해쉬코드로 넘김.
-<<<<<<< HEAD
         int idpwHashCode = (idTxt+""+pwTxt).hashCode();
-=======
-        int temp = (idEditTxt.getText().toString()+""+pwEditTxt.getText().toString()).hashCode();
->>>>>>> ecf9e9775e6c676a54ec055ffd342c2a8c6c6b62
 //        if(temp<0) temp*=-1; //음수가 되면 양수로 넘겨주려고 했으나 딱히 그럴 필요가 없다는 걸 깨달았다.
 
 
         //key-value를 String[]으로 만듦.
         String[] key= {"idpw"};
         String[] val= {
-<<<<<<< HEAD
                 String.valueOf(idpwHashCode)
-=======
-                String.valueOf(temp)
->>>>>>> ecf9e9775e6c676a54ec055ffd342c2a8c6c6b62
         };
 //        httpConnection.connect("http://52.79.106.222/eyeballs/db_save.php", "db_save.php",key, val);
         //db_login.php에 로그인 요청을 보냄. 결과는 브로드캐스트 리비서에서 받을 것임.
@@ -125,12 +117,8 @@ public class LoginActivity extends AppCompatActivity {
                 in = new Intent(LoginActivity.this, EditProfileActivity.class);
             }else{ //로그인에 성공하면 MainActivity로 이동.
                 in = new Intent(LoginActivity.this, MainActivity.class);
-<<<<<<< HEAD
 //                in.putExtra("messageFromServer", message);
                 saveProfileToStaticManager(message); //로그인 성공이므로 profile 데이터를 핸드폰에 저장함.
-=======
-                in.putExtra("messageFromServer", message);
->>>>>>> ecf9e9775e6c676a54ec055ffd342c2a8c6c6b62
             }
 
             startActivity(in);
