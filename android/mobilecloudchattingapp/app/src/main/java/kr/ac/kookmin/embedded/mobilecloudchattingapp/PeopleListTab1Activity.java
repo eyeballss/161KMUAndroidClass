@@ -1,6 +1,7 @@
 package kr.ac.kookmin.embedded.mobilecloudchattingapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +17,12 @@ public class PeopleListTab1Activity extends LinearLayout {
 
 
     //여기서 이 레이아웃이 할 일을 지정함.
-    private void work() {
+    private void work(Context context) {
         TextView text = (TextView)findViewById(R.id.section_label1);
         text.setText("1111111111");
+
+        Intent in = new Intent(context, ChattingActivity.class);
+        context.startActivity(in); //테스트를 위하여 여기로 갑니당.
 
     }
 
@@ -40,7 +44,7 @@ public class PeopleListTab1Activity extends LinearLayout {
 
         //첫번째 : xml 파일, 두번째: 가서 붙을 곳, 세번째 : t면 바로 붙고 f면 필요할 때 붙음.
         rootView = inflater.inflate(R.layout.fragment_main_tab1, this, true);
-        work();
+        work(context);
     }
 
     public View getView(){ //inflated View를 돌려줌.

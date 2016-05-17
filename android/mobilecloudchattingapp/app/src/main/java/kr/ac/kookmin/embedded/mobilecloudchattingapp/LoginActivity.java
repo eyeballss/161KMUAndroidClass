@@ -44,7 +44,6 @@ public class LoginActivity extends AppCompatActivity {
     Button loginBtn;
     private static int idpwHashCode;
     static HttpConnection httpConnection ;
-//    LocationService locationService; //여기서 GPS는 실험용이었음. 사실 로그인 화면에 GPS가 있을 이유가 없다.
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,11 +56,6 @@ public class LoginActivity extends AppCompatActivity {
         pwEditTxt=(EditText)findViewById(R.id.pwEditTxt);
         loginBtn=(Button)findViewById(R.id.loginBtn);
         httpConnection=new HttpConnection(); //http 컨넥터 만들기
-//        locationService = new LocationService(); //GPS 서비스 제공자 만들기
-
-
-//        Intent in = new Intent(LoginActivity.this, MainActivity.class);
-//        startActivity(in);
 
     }//onCreate
 
@@ -84,7 +78,6 @@ public class LoginActivity extends AppCompatActivity {
         //연결을 시도함.
         //아이디+비밀번호 문자열을 해쉬코드로 넘김.
         idpwHashCode = (idTxt+""+pwTxt).hashCode();
-//        if(temp<0) temp*=-1; //음수가 되면 양수로 넘겨주려고 했으나 딱히 그럴 필요가 없다는 걸 깨달았다.
 
 
         //key-value를 String[]으로 만듦.
@@ -92,13 +85,8 @@ public class LoginActivity extends AppCompatActivity {
         String[] val= {
                 String.valueOf(idpwHashCode)
         };
-//        httpConnection.connect("http://52.79.106.222/eyeballs/db_save.php", "db_save.php",key, val);
         //db_login.php에 로그인 요청을 보냄. 결과는 브로드캐스트 리비서에서 받을 것임.
         httpConnection.connect("http://52.79.106.222/eyeballs/db_login.php", "db_login.php",key, val);
-
-
-//        Log.d("LoginActivity", "call http connection");
-//        locationService.startLocationService(); //위치 정보 받아옵니다! 그래서 토스트로 출력! 이건 테스트 하고 있는 용도임.
 
     }//loginBtnOnClick
 
@@ -114,7 +102,6 @@ public class LoginActivity extends AppCompatActivity {
             // db_login.php로 보낸 결과값을 여기서 받음.
             final String message = intent.getStringExtra("db_login.php");
 
-
             Intent in;
             if(message.equals("false")) { //로그인에 실패하면 바로 가입을 위해 EidtProfileActivity로 이동
                 in = new Intent(LoginActivity.this, EditProfileActivity.class);
@@ -124,7 +111,6 @@ public class LoginActivity extends AppCompatActivity {
 
             }else{ //로그인에 성공하면 MainActivity로 이동.
                 in = new Intent(LoginActivity.this, MainActivity.class);
-//                in.putExtra("messageFromServer", message);
                 saveProfileToStaticManager(message); //로그인 성공이므로 profile 데이터를 핸드폰에 저장함.
                 startActivity(in);
                 finish(); //로그인 하고 나면 로그인창은 닫습니다.
@@ -135,7 +121,6 @@ public class LoginActivity extends AppCompatActivity {
             Log.d("LoginActivity", "local broadcast receiver works");
         }
     };
-
 
 
     //profile 만든 후에 제대로 저장하면 OK 아니면 FALSE
@@ -149,7 +134,6 @@ public class LoginActivity extends AppCompatActivity {
         if(StaticManager.checkIfSMHasProfile){
             Log.d("LoginActivity", "result OK!");
             Intent in = new Intent(LoginActivity.this, MainActivity.class);
-//                in.putExtra("messageFromServer", message);
             startActivity(in);
             finish(); //로그인 하고 나면 로그인창은 닫습니다.
 
@@ -157,7 +141,7 @@ public class LoginActivity extends AppCompatActivity {
 
         //저장이 안되어있다면, 즉 프로필을 제대로 생성하지 않았다면
         else{
-            //do nothing
+            //do nothing.
             Log.d("LoginActivity", "result CANCELED");
         }
 
@@ -165,7 +149,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
     }
-
 
 
 
@@ -182,11 +165,6 @@ public class LoginActivity extends AppCompatActivity {
         StaticManager.comment=token.nextToken();
         StaticManager.checkIfSMHasProfile=true; //저장했으므로 true;
 
-//        //나의 데이터 저장해두기.
-//        dataSaver.setData("nickname", StaticManager.nickname);
-//        dataSaver.setData("sex", StaticManager.sex);
-//        dataSaver.setData("comment", StaticManager.comment);
-//        dataSaver.commit();
     }
 
 

@@ -14,6 +14,8 @@ import android.util.Log;
 /**
  * Created by kesl on 2016-05-05.
  */
+
+//locationService.startLocationService(); //위치 정보 받아옵니다! 그래서 토스트로 출력!
 public class LocationService {
 
     LocationManager manager;

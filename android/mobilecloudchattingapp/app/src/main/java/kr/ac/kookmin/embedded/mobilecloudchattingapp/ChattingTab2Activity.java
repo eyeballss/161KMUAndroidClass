@@ -87,15 +87,7 @@ public class ChattingTab2Activity extends LinearLayout {
                 socket = new Socket(serverIp, 5011);
                 System.out.println("success to connect");
 
-//            while(true){
-//
-//                System.out.print("put your id : ");
-//                myId = new Scanner(System.in).nextLine();
                 myId = "samsung";
-//                if(myId.length()<3) System.out.println("more 3 characters");
-//                else if(myId.equals("game")) System.out.println("");
-//                else break;
-//            }
 
                 ClientReceiver clientReceiver = new ClientReceiver(socket);
                 ClientSender clientSender = new ClientSender(socket);

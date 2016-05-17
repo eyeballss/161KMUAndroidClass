@@ -114,47 +114,4 @@ public class EditProfileActivity extends AppCompatActivity {
 
         Log.d("LoginActivity", "send http msg to db_save.php");
     }
-
-
-
-
-
-
-
-
-
-
-
-    //EditProfileActivity에서 벗어날 때 SM에 있는 값을 가져와서 저장함.
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        dataSaver.setData("nickname", StaticManager.nickname);
-//        dataSaver.setData("sex", StaticManager.sex);
-//        dataSaver.setData("comment", StaticManager.comment);
-//        dataSaver.commit();
-    }
-
-    //EditProfileAcivity 화면을 다시 보여줄 때 데이터들을 세팅함.
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        String temp = dataSaver.getData("nickname", ""); //닉네임 불러옴, 없으면 ""
-//        StaticManager.nickname=temp; //SM에 넣음
-//        nicknameEditTxt.setText(temp); //에딧텍스트에 넣음
-//
-//        temp=dataSaver.getData("comment", ""); //코멘트 불러옴, 없으면 ""
-//        StaticManager.comment=temp; //SM에 넣음
-//        commentEditTxt.setText(temp); //에딧텍스트에 넣음
-//
-//        boolean temp2 = dataSaver.getData("sex", false); //성별 불러옴, 없으면 여자로(ㅋㅋㅋㅋ) 이건 나중에 int로 바꾸자.
-//        StaticManager.sex=temp2; //SM에 넣음
-//        if(temp2){ //true면(남자면)
-//            radioManBtn.setChecked(true);
-//        }
-//        else{ //false면(여자면)
-//            radioWomanBtn.setChecked(true);
-//        }
-    }
 }
