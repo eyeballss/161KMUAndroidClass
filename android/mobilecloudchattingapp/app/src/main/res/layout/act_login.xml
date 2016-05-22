@@ -16,7 +16,8 @@
         android:id="@+id/idEditTxt"
         android:hint="ID"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="abc"/>
     <TextView
         android:text="PW"
         android:layout_width="match_parent"
@@ -25,7 +26,8 @@
         android:id="@+id/pwEditTxt"
         android:hint="PW"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="123"/>
 
     <Button
         android:id="@+id/loginBtn"
