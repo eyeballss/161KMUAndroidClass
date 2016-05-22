@@ -40,7 +40,6 @@ public class ChattingTab2Activity extends LinearLayout {
 
     private String myId;
     private Socket socket;
-    private String serverIp = "52.79.106.222";
     public String inputStr, msg;
     private static String opponentID=null;
 
@@ -84,7 +83,7 @@ public class ChattingTab2Activity extends LinearLayout {
     class StartNetwork extends Thread{
         public void run(){
             try {
-                socket = new Socket(serverIp, 5011);
+                socket = new Socket(StaticManager.ipAddress, 5011);
                 System.out.println("success to connect");
 
                 myId = "samsung";

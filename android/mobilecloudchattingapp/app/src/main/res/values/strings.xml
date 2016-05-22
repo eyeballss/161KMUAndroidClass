@@ -5,6 +5,8 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_login_">Who is near me</string>
 
+    <string name="test"> testtest</string>
+
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>

@@ -86,7 +86,7 @@ public class LoginActivity extends AppCompatActivity {
                 String.valueOf(idpwHashCode)
         };
         //db_login.php에 로그인 요청을 보냄. 결과는 브로드캐스트 리비서에서 받을 것임.
-        httpConnection.connect("http://52.79.106.222/eyeballs/db_login.php", "db_login.php",key, val);
+        httpConnection.connect("http://"+StaticManager.ipAddress+"/eyeballs/db_login.php", "db_login.php",key, val);
 
     }//loginBtnOnClick
 

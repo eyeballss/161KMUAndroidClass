@@ -16,8 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import helper.StaticManager;
-
 public class MainActivity extends AppCompatActivity {
 
     /**
@@ -152,8 +150,8 @@ public class MainActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
             View rootView;
-            PeopleListTab1Activity tab1 = new PeopleListTab1Activity(StaticManager.applicationContext);
-            ChattingTab2Activity tab2 = new ChattingTab2Activity(StaticManager.applicationContext);
+            PeopleListTab1Activity tab1 = new PeopleListTab1Activity(getContext());
+            ChattingTab2Activity tab2 = new ChattingTab2Activity(getContext());
 
             if(getArguments().getInt(ARG_SECTION_NUMBER) == 2){
                 container.addView(tab2);

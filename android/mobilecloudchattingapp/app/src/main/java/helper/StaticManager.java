@@ -4,9 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by kesl on 2016-05-01.
@@ -20,6 +27,7 @@ public class StaticManager {
     public static String comment;
     public static boolean sex; //F면 여자 T이면 남자
     public static boolean checkIfSMHasProfile=false; //개인 정보를 staticManager가 갖고 있다면 true 아니면 false
+    public static String ipAddress="52.79.106.222"; //IP 주소
 
 
     public static Context applicationContext;
@@ -43,7 +51,7 @@ public class StaticManager {
     //테스트용 토스트 메세지
     public static void testToastMsg(final String string){
         if(!singleton){
-            handler = new Handler(); //핸들러는 하나만 있어도 되므로 싱글톤을 사용하여 하나만 생성하도록, 이렇게 해보자.
+            handler = new Handler(Looper.getMainLooper()); //핸들러는 하나만 있어도 되므로 싱글톤을 사용하여 하나만 생성하도록, 이렇게 해보자.
             singleton=true;
             Log.d("Static Manager", "new handler and singleton is "+singleton);
         }
@@ -52,6 +60,24 @@ public class StaticManager {
                 Toast.makeText(applicationContext, string, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public static List sortByValue(final Map map){
+        List<String> list = new ArrayList();
+        list.addAll(map.keySet());
+
+        Collections.sort(list, new Comparator() {
+
+            public int compare(Object o1, Object o2) {
+                Object v1 = map.get(o1);
+                Object v2 = map.get(o2);
+
+                return ((Comparable) v1).compareTo(v2);
+            }
+
+        });
+//        Collections.reverse(list); // 주석시 오름차순
+        return list;
     }
 
 }
