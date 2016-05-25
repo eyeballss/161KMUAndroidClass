@@ -32,7 +32,7 @@ public class PeopleListTab1Activity extends LinearLayout {
     View rootView;
     ListView listView;
     ListViewAdapter_MainTab1 listViewAdapterMainTab1;
-    String data = "A*130*B*100*C*100*D*300*E*120"; //하드코딩한 녀석
+    String data = "A*130*B*100*C*100*D*300*E*120*testname*140*test0513*110"; //하드코딩한 녀석
     ArrayList<String> name; //리스트에 들어가는 데이터
     ArrayList<String> distance; //리스트에 들어가는 데이터
 
@@ -42,7 +42,6 @@ public class PeopleListTab1Activity extends LinearLayout {
         name= new ArrayList<String>();
         distance= new ArrayList<String>();
         dataParser();
-        LocalBroadcastManager.getInstance(context).registerReceiver(mLocalBroadcastReceiver, new IntentFilter("localBroadCast"));
 
 
 
@@ -56,6 +55,7 @@ public class PeopleListTab1Activity extends LinearLayout {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                LocalBroadcastManager.getInstance(context).registerReceiver(mLocalBroadcastReceiver, new IntentFilter("localBroadCast"));
 
                 String msg =
                         "name : \n" + name.get(position) + "\n" +
@@ -64,12 +64,6 @@ public class PeopleListTab1Activity extends LinearLayout {
                 Message.yesNoMsgShow(msg, "chatting_dialog", name.get(position), "no", context);
             }
         });
-
-
-
-//        Intent in = new Intent(context, ChattingActivity.class);
-//        in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        context.startActivity(in); //테스트를 위하여 여기로 갑니당.
 
 
     }//work
@@ -87,6 +81,13 @@ public class PeopleListTab1Activity extends LinearLayout {
                 StaticManager.testToastMsg("싫구나..");
             }else {
                 StaticManager.testToastMsg(message + "랑 대화하자!");
+
+                Intent in = new Intent(context, ChattingActivity.class);
+                in.putExtra("oppoNickname", message);
+                in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(in); //이쪽으로 가서 채팅.
+
+                LocalBroadcastManager.getInstance(context).unregisterReceiver(mLocalBroadcastReceiver);
             }
 
 

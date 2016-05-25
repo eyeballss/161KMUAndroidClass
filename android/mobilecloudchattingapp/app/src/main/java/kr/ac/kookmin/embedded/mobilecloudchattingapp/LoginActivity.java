@@ -78,7 +78,8 @@ public class LoginActivity extends AppCompatActivity {
         //연결을 시도함.
         //아이디+비밀번호 문자열을 해쉬코드로 넘김.
         idpwHashCode = (idTxt+""+pwTxt).hashCode();
-
+        //SM에 저장함.
+        StaticManager.idpw=idpwHashCode;
 
         //key-value를 String[]으로 만듦.
         String[] key= {"idpw"};
@@ -105,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
             Intent in;
             if(message.equals("false")) { //로그인에 실패하면 바로 가입을 위해 EidtProfileActivity로 이동
                 in = new Intent(LoginActivity.this, EditProfileActivity.class);
-                in.putExtra("idpw", idpwHashCode);
+                in.putExtra("path", "loginFail");
                 startActivityForResult(in, 1);
 
 

@@ -1,8 +1,8 @@
 package kr.ac.kookmin.embedded.mobilecloudchattingapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -52,17 +52,20 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        //프로필을 변경하는 버튼을 누르면
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                Intent in = new Intent(MainActivity.this, EditProfileActivity.class);
+                in.putExtra("path", "editProfile");
+                startActivity(in);
             }
         });
 
     }
 
-    
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -154,11 +157,11 @@ public class MainActivity extends AppCompatActivity {
             PeopleListTab1Activity tab1 = new PeopleListTab1Activity(getContext());
             ChattingTab2Activity tab2 = new ChattingTab2Activity(getContext());
 
-            if(getArguments().getInt(ARG_SECTION_NUMBER) == 2){
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 2) {
                 container.addView(tab2);
                 rootView = tab2.getView();
 //                rootView = inflater.inflate(R.layout.fragment_main_tab1, container, false);
-            }else {
+            } else {
                 container.addView(tab1);
                 rootView = tab1.getView();
 //                rootView = inflater.inflate(R.layout.fragment_main_tab2, container, false);

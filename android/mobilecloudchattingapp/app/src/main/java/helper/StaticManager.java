@@ -23,6 +23,7 @@ public class StaticManager {
 
     private static Handler handler;
     private static boolean singleton=false;
+    public static int idpw;
     public static String nickname;
     public static String comment;
     public static boolean sex; //F면 여자 T이면 남자

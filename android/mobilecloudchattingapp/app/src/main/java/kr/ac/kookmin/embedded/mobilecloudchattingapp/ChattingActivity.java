@@ -27,6 +27,11 @@ public class ChattingActivity extends AppCompatActivity {
     Intent intent;
     Handler handler;
 
+    //서버 소켓
+    Socket socket;
+    ClientReceiver clientReceiver;
+    ClientSender clientSender;
+
     //아래는 채팅 리스트
     ListView mChattingList;
     ArrayAdapter<String> mChattingAdapter; //이걸로 조종하면 됨.
@@ -40,7 +45,7 @@ public class ChattingActivity extends AppCompatActivity {
         intent = getIntent();
         oppoNickname = intent.getStringExtra("oppoNickname");
 
-        //채팅한 필요한 뷰와 핸들러
+        //채팅에 필요한 뷰와 핸들러
         sendBtn = (Button) findViewById(R.id.sendBtn);
         editxtForChat = (EditText) findViewById(R.id.editxtForChat);
         handler = new Handler(Looper.getMainLooper());
@@ -66,7 +71,7 @@ public class ChattingActivity extends AppCompatActivity {
 
 
     public class StartNetwork extends Thread {
-        private Socket socket;
+//        private Socket socket;
 //        private String serverIp;
 
 //        public StartNetwork(String ip) {
@@ -83,14 +88,14 @@ public class ChattingActivity extends AppCompatActivity {
 
 //                myId = "samsung";
 
-                ClientReceiver clientReceiver = new ClientReceiver(socket);
-                ClientSender clientSender = new ClientSender(socket);
+                clientReceiver = new ClientReceiver(socket);
+                clientSender = new ClientSender(socket);
 
                 clientReceiver.start();
                 clientSender.start();
             } catch (IOException e) {
 //            System.out.println("!!");
-                StaticManager.testToastMsg("start network error!!!");
+                StaticManager.testToastMsg("network error!!!");
             }
         }
     }
@@ -103,10 +108,17 @@ public class ChattingActivity extends AppCompatActivity {
             this.socket = socket;
             try {
                 output = new DataOutputStream(socket.getOutputStream());
-                output.writeUTF(StaticManager.nickname); //서버에 먼저 내 아이디를 보내줌. 나인 것을 등록.
+                write(StaticManager.nickname); //서버에 먼저 내 아이디를 보내줌. 나인 것을 등록.
                 Log.d("Chatting activity", "startNetwork register my id in server");
             } catch (Exception e) {
             }
+        }
+
+        public void write(String msg){
+            try{
+                output.writeUTF(msg);
+            }catch(IOException e){Log.d("ChattingActivity", "write method io exception");}
+            catch(Exception e){Log.d("ChattingActivity", "write method exception");}
         }
 
         @Override
@@ -126,25 +138,27 @@ public class ChattingActivity extends AppCompatActivity {
                         Log.d("Chatting activity", "startNetwork sendBtn clicked");
 
                         //위에 있는게 정상적인 예제고 아래가 하드코딩 한 것
-//                        String msg = oppoNickname+"*" + editxtForChat.getText().toString();
-                        String msg = "abc*" + editxtForChat.getText().toString();
+                        String msg = oppoNickname+"*" + editxtForChat.getText().toString();
+//                        String msg = "abc*" + editxtForChat.getText().toString();
 
-                        if (msg.equals("exit"))
-                            System.exit(0);
+//                        if (msg.equals("exit"))
+//                            System.exit(0);
                         try {
                             Log.d("Chatting activity", "startNetwork ready to send");
-                            output.writeUTF(msg); //서버로 보내고
-                            Log.d("Chatting activity", "msg for Server : "+msg);
+                            StaticManager.testToastMsg("startNetwork ready to send");
+                            write(msg); //서버로 보내고
+                            Log.d("Chatting activity", "msg for Server : " + msg);
+                            StaticManager.testToastMsg("msg for Server : " + msg);
 
-                            handler.post(new Runnable() { //VIEW 들을 만져줌.
-                                public void run() {
-                                    mChattingAdapter.add(editxtForChat.getText().toString()); //채팅창에 올리고
-                                    editxtForChat.setText(""); //비움.
-                                }
-                            });
+                                    handler.post(new Runnable() { //VIEW 들을 만져줌.
+                                        public void run() {
+                                            mChattingAdapter.add(editxtForChat.getText().toString()); //채팅창에 올리고
+                                            editxtForChat.setText(""); //비움.
+                                        }
+                                    });
 
                             Log.d("Chatting activity", "startNetwork success to send");
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                         }
                     }
                 });//onClickListener
@@ -157,14 +171,14 @@ public class ChattingActivity extends AppCompatActivity {
     public class ClientReceiver extends Thread {
         Socket socket;
         DataInputStream input;
-        DataOutputStream output;
+//        DataOutputStream output;
         String inputStr;
 
         public ClientReceiver(Socket socket) {
             this.socket = socket;
             try {
                 input = new DataInputStream(socket.getInputStream());
-                output = new DataOutputStream(socket.getOutputStream());
+//                output = new DataOutputStream(socket.getOutputStream());
             } catch (IOException e) {
             }
         }
@@ -191,5 +205,21 @@ public class ChattingActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onStop();
+        Log.d("chatting activity", "onPause method call");
 
+        try {
+            socket.close();
+            socket=null;
+            clientReceiver.interrupt();
+            clientSender.interrupt();
+
+            Log.d("chatting activity", "socket and threads close");
+        } catch (IOException e) {
+            Log.d("chatting activity", "socket close fail");
+            e.printStackTrace();
+        }
+    }
 }

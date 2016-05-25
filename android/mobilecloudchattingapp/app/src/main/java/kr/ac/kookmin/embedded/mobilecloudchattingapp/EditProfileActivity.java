@@ -18,24 +18,40 @@ public class EditProfileActivity extends AppCompatActivity {
     RadioButton radioManBtn, radioWomanBtn;
     DataSaver dataSaver;
     Intent intent;
-
-    static int idpwHashCode;
+    boolean whereicame= false; //false면 로그인 실패로 오는 경우. true면 edit으로 오는 경우
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_edit_profile);
 
         intent = getIntent();
-        idpwHashCode = intent.getIntExtra("idpw", 0); //idpw를 가져옴.
 
         nicknameEditTxt = (EditText)findViewById(R.id.nicknameEditTxt);
         commentEditTxt = (EditText)findViewById(R.id.commentEditTxt);
         radioManBtn = (RadioButton)findViewById(R.id.radioManBtn);
         radioWomanBtn = (RadioButton)findViewById(R.id.radioWomanBtn);
 
+        //로그인 실패로 온 경우
+        if(intent.getStringExtra("path").equals("loginFail")){
+            StaticManager.checkIfSMHasProfile=false;
+            whereicame=false;
+        }
+        //수정하기 위해 온 경우
+        if(intent.getStringExtra("path").equals("editProfile")){
+            whereicame=true;
+            setViews();
+        }
+
         dataSaver = new DataSaver();
 
-        StaticManager.checkIfSMHasProfile=false;
+    }
+
+    //뷰들을 StaticManager에서 따와서 세팅함.
+    private void setViews() {
+        nicknameEditTxt.setText(StaticManager.nickname);
+        commentEditTxt.setText(StaticManager.comment);
+        if(StaticManager.sex) radioWomanBtn.setChecked(true);
+        else radioManBtn.setChecked(true);
     }
 
     //닉네임과 sex 여부 체크하고 코멘트는 괜찮음.
@@ -75,14 +91,20 @@ public class EditProfileActivity extends AppCompatActivity {
 
         Log.d("EditProfileActivity", "push Back Btn");
 
-        //makeProfile ==true : 다 만들고 Back 눌러서 나가면
-        if(StaticManager.checkIfSMHasProfile){
+        //makeProfile ==true && whereicame로그인 실패로 옴 : 다 만들고 Back 눌러서 나가면
+        if(StaticManager.checkIfSMHasProfile && whereicame==false){
             saveProfileIntoServer();//디비를 저장하고
             setResult(RESULT_OK, intent); //OK라고 말해줌.
-            Log.d("EditProfileActivity", "result OK");
+            Log.d("EditProfileActivity", "login fail result OK");
         }
-        //makeProfiel==false : 만들던 중간에 Back 눌러서 나가면
-        else{
+        //makeProfile ==true && whereicame edit을 하기 위해 옴 : 어찌저찌 채우고 Back 눌러 나가면
+        else if(StaticManager.checkIfSMHasProfile && whereicame==true){
+            editProfileInServer(); //디비에 수정.
+            setResult(RESULT_OK, intent);
+            Log.d("EditProfileActivity", "edit profile result OK");
+        }
+            //makeProfiel==false : 만들던 중간에 Back 눌러서 나가면
+        else if(!StaticManager.checkIfSMHasProfile){
             setResult(RESULT_CANCELED, intent); //취소가 되었다고 말해줌.
             Log.d("EditProfileActivity", "result CANCLE");
         }
@@ -91,7 +113,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
 
 
-    //데이터베이스에 저장
+    //데이터베이스에 저장. 완전 처음으로 저장하는 거.
     static private void saveProfileIntoServer(){
         Log.d("LoginActivity", "save profile In server call");
 
@@ -101,17 +123,41 @@ public class EditProfileActivity extends AppCompatActivity {
 
         String[] key= {"idpw", "nickname", "sex", "comment"};
         String[] val= {
-                String.valueOf(idpwHashCode),
+                String.valueOf(StaticManager.idpw),
                 StaticManager.nickname,
                 sex,
                 StaticManager.comment
         };
 
         //db_login.php에 로그인 요청을 보냄. 결과는 브로드캐스트 리비서에서 받을 것임.
-        Log.d("LoginActivity", val[0] + " " + val[1] + " " + val[2]+" "+val[3]+" are sended");
+        Log.d("LoginActivity", val[0] + " " + val[1] + " " + val[2]+" "+val[3]+" are sent");
         HttpConnection httpConnection = new HttpConnection();
         httpConnection.connect("http://52.79.106.222/eyeballs/db_save.php", "db_save.php", key, val);
 
         Log.d("LoginActivity", "send http msg to db_save.php");
+    }
+
+    //데이터베이스에 저장. 내 프로필 바꾸는 거. idpw 값을 기준으로 저장할꺼임.
+    static private void editProfileInServer(){
+        Log.d("LoginActivity", "edit profile In server call");
+
+        String sex;
+        if(StaticManager.sex){ sex="m";}
+        else {sex="f";}
+
+        String[] key= {"idpw", "nickname", "sex", "comment"};
+        String[] val= {
+                String.valueOf(StaticManager.idpw),
+                StaticManager.nickname,
+                sex,
+                StaticManager.comment
+        };
+
+        //db_editProfile.php에 업데이트 해달라고 요청함.
+        Log.d("EditProfile", val[0] + " " + val[1] + " " + val[2]+" "+val[3]+" are sent");
+        HttpConnection httpConnection = new HttpConnection();
+        httpConnection.connect("http://52.79.106.222/eyeballs/db_editProfile.php", "db_editProfile.php", key, val);
+
+        Log.d("LoginActivity", "send http msg to db_editProfile.php");
     }
 }
