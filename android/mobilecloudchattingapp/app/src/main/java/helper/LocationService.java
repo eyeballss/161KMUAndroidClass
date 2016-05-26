@@ -2,6 +2,7 @@ package helper;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,54 +19,25 @@ import android.util.Log;
 //locationService.startLocationService(); //위치 정보 받아옵니다! 그래서 토스트로 출력!
 public class LocationService {
 
-    LocationManager manager;
+    private LocationManager manager;
+    private GPSListener gpsListener;
 
-
-    public LocationService(){ //생성자
+    public LocationService() { //생성자
         checkDangerousPermissions();
     }
-
-
 
     //GPS 서비스 실행!
     public void startLocationService() {
         manager = StaticManager.locationManager;
 
-        GPSListener gpsListener = new GPSListener();
-        long minTime = 10000; //이 시간(10000ms= 10초)이 지나면 GPS를 업데이트 해주세요.
-        float minDistance = 0; //내가 이만큼(0이면 항상) 움직이면 업데이트 해주세요.
+        gpsListener = new GPSListener();
 
-        try {
-            manager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    minTime,
-                    minDistance,
-                    gpsListener);
+        requestGPS(); //곧바로 시작함.
 
-            manager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    minTime,
-                    minDistance,
-                    gpsListener);
-
-            android.location.Location lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lastLocation != null) {
-
-                Double latitude = lastLocation.getLatitude();
-                Double longitude = lastLocation.getLongitude();
-
-                Log.i("GPSListener", "최근 위도 경도 : "+latitude+" "+longitude);
-
-                StaticManager.testToastMsg("최근 위도 경도 : "+latitude+" "+longitude);
-            }
-        } catch(SecurityException ex) {
-            ex.printStackTrace();
-        }
 
         Log.d("GPS Location", "startLocationService() success");
 
     }//startLocationService
-
 
 
 //    //GPS 현재 사용할 수 있는지 없는지 체크해주는 메소드였으나 manager.isProviderEnabled(LocationManager.GPS_PROVIDER)에서 NullPointException 오류로 구현 보류.
@@ -96,10 +68,49 @@ public class LocationService {
 //    참고 : http://stackoverflow.com/questions/843675/how-do-i-find-out-if-the-gps-of-an-android-device-is-enabled
 
 
+    public void requestGPS() {
+
+        long minTime = 1000; //이 시간(1000ms= 1초)이 지나면 GPS를 업데이트 해주세요.
+        float minDistance = 0; //내가 이만큼(0이면 항상) 움직이면 업데이트 해주세요.
+
+        try {
+            manager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    minTime,
+                    minDistance,
+                    gpsListener);
+
+            manager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    minTime,
+                    minDistance,
+                    gpsListener);
+
+            android.location.Location lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (lastLocation != null) {
+
+                Double latitude = lastLocation.getLatitude();
+                Double longitude = lastLocation.getLongitude();
+
+                Log.i("GPSListener", "최근 위도 경도 : " + latitude + " " + longitude);
+
+//                StaticManager.testToastMsg("최근 위도 경도 : "+latitude+" "+longitude);
+                StaticManager.sendBroadcast("gps data", latitude + " " + longitude);
+            }
+        } catch (SecurityException ex) {
+            ex.printStackTrace();
+        }
+    }
 
 
+    public void stopGPS(Context context) {
 
+        if ( ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions( (Activity)context, new String[] {  android.Manifest.permission.ACCESS_COARSE_LOCATION  }, 1);
+        }
 
+        manager.removeUpdates(gpsListener);
+    }
 
 
 
@@ -142,7 +153,9 @@ class GPSListener implements LocationListener {
 
         Log.i("GPS Location", "위도 경도 : " + latitude + " " + longitude);
 
-        StaticManager.testToastMsg("위도 경도 : "+latitude+" "+longitude);
+//        StaticManager.testToastMsg("위도 경도 : "+latitude+" "+longitude);
+
+        StaticManager.sendBroadcast("gps data", latitude + " " + longitude);
     }
 
 

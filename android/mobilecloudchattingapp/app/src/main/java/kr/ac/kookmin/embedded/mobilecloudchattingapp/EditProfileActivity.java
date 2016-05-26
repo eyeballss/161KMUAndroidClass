@@ -115,7 +115,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     //데이터베이스에 저장. 완전 처음으로 저장하는 거.
     static private void saveProfileIntoServer(){
-        Log.d("LoginActivity", "save profile In server call");
+        Log.d("EditProfileActivity", "save profile In server call");
 
         String sex;
         if(StaticManager.sex){ sex="m";}
@@ -130,16 +130,16 @@ public class EditProfileActivity extends AppCompatActivity {
         };
 
         //db_login.php에 로그인 요청을 보냄. 결과는 브로드캐스트 리비서에서 받을 것임.
-        Log.d("LoginActivity", val[0] + " " + val[1] + " " + val[2]+" "+val[3]+" are sent");
+        Log.d("EditProfileActivity", val[0] + " " + val[1] + " " + val[2] + " " + val[3] + " are sent");
         HttpConnection httpConnection = new HttpConnection();
-        httpConnection.connect("http://52.79.106.222/eyeballs/db_save.php", "db_save.php", key, val);
+        httpConnection.connect("http://"+StaticManager.ipAddress+"/eyeballs/db_save.php", "db_save.php", key, val);
 
-        Log.d("LoginActivity", "send http msg to db_save.php");
+        Log.d("EditProfileActivity", "send http msg to db_save.php");
     }
 
     //데이터베이스에 저장. 내 프로필 바꾸는 거. idpw 값을 기준으로 저장할꺼임.
     static private void editProfileInServer(){
-        Log.d("LoginActivity", "edit profile In server call");
+        Log.d("EditProfileActivity", "edit profile In server call");
 
         String sex;
         if(StaticManager.sex){ sex="m";}
@@ -154,10 +154,10 @@ public class EditProfileActivity extends AppCompatActivity {
         };
 
         //db_editProfile.php에 업데이트 해달라고 요청함.
-        Log.d("EditProfile", val[0] + " " + val[1] + " " + val[2]+" "+val[3]+" are sent");
+        Log.d("EditProfileActivity", val[0] + " " + val[1] + " " + val[2]+" "+val[3]+" are sent");
         HttpConnection httpConnection = new HttpConnection();
-        httpConnection.connect("http://52.79.106.222/eyeballs/db_editProfile.php", "db_editProfile.php", key, val);
+        httpConnection.connect("http://"+StaticManager.ipAddress+"/eyeballs/db_editProfile.php", "db_editProfile.php", key, val);
 
-        Log.d("LoginActivity", "send http msg to db_editProfile.php");
+        Log.d("EditProfileActivity", "send http msg to db_editProfile.php");
     }
 }

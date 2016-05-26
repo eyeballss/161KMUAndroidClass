@@ -29,6 +29,7 @@ public class StaticManager {
     public static boolean sex; //F면 여자 T이면 남자
     public static boolean checkIfSMHasProfile=false; //개인 정보를 staticManager가 갖고 있다면 true 아니면 false
     public static String ipAddress="52.79.106.222"; //IP 주소
+    public static boolean gps=false;
 
 
     public static Context applicationContext;

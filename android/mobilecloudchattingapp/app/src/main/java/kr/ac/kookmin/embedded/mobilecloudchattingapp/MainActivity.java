@@ -1,22 +1,35 @@
 package kr.ac.kookmin.embedded.mobilecloudchattingapp;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import helper.HttpConnection;
+import helper.LocationService;
+import helper.StaticManager;
+
 public class MainActivity extends AppCompatActivity {
+
+    //gps를 사용합니당.
+    private LocationService locationService;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -64,6 +77,84 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //플래그를 조절하는 버튼을 누르면
+        FloatingActionButton flagMe = (FloatingActionButton) findViewById(R.id.flagForFindingMe);
+        flagMe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //GPS를 기록하자.
+                recodeGPS();
+            }
+        });
+
+        locationService = new LocationService();
+        locationService.startLocationService();
+
+
+    }
+
+    private void recodeGPS() {
+        //gps 받아서 레코딩 함.
+        boolean gps = StaticManager.locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (gps) {
+            StaticManager.gps = true;
+            StaticManager.testToastMsg("Turn on the gps.\nOther people can see you now.");
+        } else {
+            StaticManager.gps = false;
+            updateMyGPS("0 0"); //0으로 내 gps를 업데이트 함.
+            StaticManager.testToastMsg("Turn off the gps.\nOther people can't see you now.");
+
+        }
+    }
+
+    //로컬 브로드캐스트 해서 받아온 것. 바로 위의 recodeGPS에서 방송 한 거임.
+    private BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // db_login.php로 보낸 결과값을 여기서 받음.
+            final String message = intent.getStringExtra("gps data");
+
+            updateMyGPS(message); //계속 업데이트 함
+//            Intent in;
+//            if(message.equals("false")) { //로그인에 실패하면 바로 가입을 위해 EidtProfileActivity로 이동
+//                in = new Intent(LoginActivity.this, EditProfileActivity.class);
+//                in.putExtra("path", "loginFail");
+//                startActivityForResult(in, 1);
+//
+//
+//            }else{ //로그인에 성공하면 MainActivity로 이동.
+//                in = new Intent(LoginActivity.this, MainActivity.class);
+//                saveProfileToStaticManager(message); //로그인 성공이므로 profile 데이터를 핸드폰에 저장함.
+//                startActivity(in);
+//                finish(); //로그인 하고 나면 로그인창은 닫습니다.
+//            }
+
+
+            Log.d("MainActivity", "gps data get from broadcast");
+        }
+    };
+
+    private void updateMyGPS(String data) {
+        if(data==null) return;
+        Log.d("MainActivity", "update gps call");
+        String latitude = data.substring(0, data.indexOf(" ")).trim().toString();
+        String longitude = data.substring(data.indexOf(" ") + 1).trim().toString();
+
+        String[] key = {"idpw", "latitude", "longitude"};
+        String[] val = {
+                String.valueOf(StaticManager.idpw),
+                "1",
+                "2"
+        };
+
+//        StaticManager.testToastMsg("["+data.substring(0, data.indexOf(" "))+"]["+data.substring(data.indexOf(" ") + 1)+"]");
+
+        //db_updateGPS.php에 업데이트 해달라고 요청함.
+        Log.d("MainActivity", val[0] + " " + val[1] + " " + val[2] + " are sent");
+        HttpConnection httpConnection = new HttpConnection();
+        httpConnection.connect("http://" + StaticManager.ipAddress + "/eyeballs/db_updateGPS.php", "db_updateGPS.php", key, val);
+
+        Log.d("MainActivity", "send http msg to db_updateGPS.php");
     }
 
 
@@ -174,5 +265,22 @@ public class MainActivity extends AppCompatActivity {
 
             return rootView;
         }
+    }
+
+
+    public void onResume() {
+        super.onResume();
+        //이것도 나중에 스태틱으로 바꿔주자. 여기서 특별히 다르게 처리해야 할 것은 없으니까.
+        // Register mMessageReceiver to receive messages. 브로드캐스트 리시버 등록
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocalBroadcastReceiver, new IntentFilter("localBroadCast"));
+        locationService.requestGPS(); //gps 다시 시작
+    }
+
+    protected void onPause() {
+        //이것도 나중에 스태틱으로 바꿔주자. 여기서 특별히 다르게 처리해야 할 것은 없으니까.
+        // Unregister since the activity is not visible 브로드캐스트 리비서 해제
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocalBroadcastReceiver);
+        locationService.stopGPS(this); //gps 멈추기
+        super.onPause();
     }
 }
