@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
             StaticManager.gps = true;
             StaticManager.testToastMsg("Turn on the gps.\nOther people can see you now.");
         } else {
+//            locationService.enableGPSSetting(gps);
             StaticManager.gps = false;
             updateMyGPS("0 0"); //0으로 내 gps를 업데이트 함.
             StaticManager.testToastMsg("Turn off the gps.\nOther people can't see you now.");
@@ -143,8 +144,8 @@ public class MainActivity extends AppCompatActivity {
         String[] key = {"idpw", "latitude", "longitude"};
         String[] val = {
                 String.valueOf(StaticManager.idpw),
-                "1",
-                "2"
+                latitude,
+                longitude
         };
 
 //        StaticManager.testToastMsg("["+data.substring(0, data.indexOf(" "))+"]["+data.substring(data.indexOf(" ") + 1)+"]");
@@ -208,9 +209,9 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return "PEOPLE";
                 case 1:
-                    return "SECTION 2";
+                    return "CHAT LIST";
             }
             return null;
         }
@@ -281,6 +282,8 @@ public class MainActivity extends AppCompatActivity {
         // Unregister since the activity is not visible 브로드캐스트 리비서 해제
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocalBroadcastReceiver);
         locationService.stopGPS(this); //gps 멈추기
+        StaticManager.gps = false;
+        updateMyGPS("0 0"); //0으로 내 gps를 업데이트 함.
         super.onPause();
     }
 }

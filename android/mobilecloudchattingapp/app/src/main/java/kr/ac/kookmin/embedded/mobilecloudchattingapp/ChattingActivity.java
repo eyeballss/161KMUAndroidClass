@@ -52,7 +52,7 @@ public class ChattingActivity extends AppCompatActivity {
 
         //채팅 리스트 객체 만들고 어댑터 적용
         mChattingList = (ListView) findViewById(R.id.chattingList);
-        mChattingAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.list_items);
+        mChattingAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.list_chatting_items);
         mChattingList.setAdapter(mChattingAdapter);
 
         //채팅 쓰레드 시작
@@ -221,5 +221,6 @@ public class ChattingActivity extends AppCompatActivity {
             Log.d("chatting activity", "socket close fail");
             e.printStackTrace();
         }
+        super.onPause();
     }
 }

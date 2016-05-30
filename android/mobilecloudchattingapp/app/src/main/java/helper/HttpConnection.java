@@ -54,8 +54,9 @@ public class HttpConnection {
         Log.d("http connection", "connect method call");
         Log.d("http connection", "url : " + url);
         Log.d("http connection", "phpName : " + phpName);
-        Log.d("http connection", "key : " + key);
-        Log.d("http connection", "value : " + value);
+        for(int i=0; i<key.length; i++) Log.d("http connection", "key["+i+"] : " + key[i]);
+        for(int i=0; i<value.length; i++) Log.d("http connection", "value["+i+"] : " + value[i]);
+
 //        Log.d("http connection", "context : " + context);
 
         asykTsk.execute(); //AsyncTask를 실행함!

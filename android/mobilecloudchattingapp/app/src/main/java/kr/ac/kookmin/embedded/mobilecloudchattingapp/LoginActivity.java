@@ -21,14 +21,13 @@ import helper.StaticManager;
 
 /**
  * Don't forget:
- *  - makeing Log at method
- *  - TDD
- *  - makeing flow chart
- *  - naming rule
- *  - access modifier
- *  - exception
- *  - comments (//)
- *
+ * - makeing Log at method
+ * - TDD
+ * - makeing flow chart
+ * - naming rule
+ * - access modifier
+ * - exception
+ * - comments (//)
  */
 
 
@@ -43,57 +42,57 @@ public class LoginActivity extends AppCompatActivity {
     EditText idEditTxt, pwEditTxt;
     Button loginBtn;
     private static int idpwHashCode;
-    static HttpConnection httpConnection ;
+    static HttpConnection httpConnection;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_login);
 
-        StaticManager.applicationContext=getApplicationContext(); //어플리케이션 콘텍스트 넘김.
-        StaticManager.locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);//위치매니저 넘김.
+        StaticManager.applicationContext = getApplicationContext(); //어플리케이션 콘텍스트 넘김.
+        StaticManager.locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);//위치매니저 넘김.
 
-        idEditTxt=(EditText)findViewById(R.id.idEditTxt);
-        pwEditTxt=(EditText)findViewById(R.id.pwEditTxt);
-        loginBtn=(Button)findViewById(R.id.loginBtn);
-        httpConnection=new HttpConnection(); //http 컨넥터 만들기
+        idEditTxt = (EditText) findViewById(R.id.idEditTxt);
+        pwEditTxt = (EditText) findViewById(R.id.pwEditTxt);
+        loginBtn = (Button) findViewById(R.id.loginBtn);
+        httpConnection = new HttpConnection(); //http 컨넥터 만들기
 
     }//onCreate
 
 
     //로그인 버튼 클릭하면
-    public void loginBtnOnClick(View v){
+    public void loginBtnOnClick(View v) {
 
 
         String idTxt = idEditTxt.getText().toString().trim();
         String pwTxt = pwEditTxt.getText().toString().trim();
 
-        if(idTxt.length()==0) {
+        if (idTxt.length() == 0) {
             StaticManager.testToastMsg("ID is empty!");
             return;
         }
-        if(pwTxt.length()==0) {
+        if (idTxt.contains("*")) {
+            StaticManager.testToastMsg("can not use '*' in ID");
+            return;
+        }
+        if (pwTxt.length() == 0) {
             StaticManager.testToastMsg("PW is empty!");
             return;
         }
         //연결을 시도함.
         //아이디+비밀번호 문자열을 해쉬코드로 넘김.
-        idpwHashCode = (idTxt+""+pwTxt).hashCode();
+        idpwHashCode = (idTxt + "" + pwTxt).hashCode();
         //SM에 저장함.
-        StaticManager.idpw=idpwHashCode;
+        StaticManager.idpw = idpwHashCode;
 
         //key-value를 String[]으로 만듦.
-        String[] key= {"idpw"};
-        String[] val= {
+        String[] key = {"idpw"};
+        String[] val = {
                 String.valueOf(idpwHashCode)
         };
         //db_login.php에 로그인 요청을 보냄. 결과는 브로드캐스트 리비서에서 받을 것임.
-        httpConnection.connect("http://"+StaticManager.ipAddress+"/eyeballs/db_login.php", "db_login.php",key, val);
+        httpConnection.connect("http://" + StaticManager.ipAddress + "/eyeballs/db_login.php", "db_login.php", key, val);
 
     }//loginBtnOnClick
-
-
-
-
 
 
     //서버에서 가져온 값을 알려주는 브로드캐스트 리시버
@@ -104,19 +103,18 @@ public class LoginActivity extends AppCompatActivity {
             final String message = intent.getStringExtra("db_login.php");
 
             Intent in;
-            if(message.equals("false")) { //로그인에 실패하면 바로 가입을 위해 EidtProfileActivity로 이동
+            if (message.equals("false")) { //로그인에 실패하면 바로 가입을 위해 EidtProfileActivity로 이동
                 in = new Intent(LoginActivity.this, EditProfileActivity.class);
                 in.putExtra("path", "loginFail");
                 startActivityForResult(in, 1);
 
 
-            }else{ //로그인에 성공하면 MainActivity로 이동.
+            } else { //로그인에 성공하면 MainActivity로 이동.
                 in = new Intent(LoginActivity.this, MainActivity.class);
                 saveProfileToStaticManager(message); //로그인 성공이므로 profile 데이터를 핸드폰에 저장함.
                 startActivity(in);
                 finish(); //로그인 하고 나면 로그인창은 닫습니다.
             }
-
 
 
             Log.d("LoginActivity", "local broadcast receiver works");
@@ -132,7 +130,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Log.d("LoginActivity", "onActivityResult call");
         //저장이 되어있다면, 즉 프로필을 제대로 생성했다면
-        if(StaticManager.checkIfSMHasProfile){
+        if (StaticManager.checkIfSMHasProfile && resultCode == RESULT_OK) {
             Log.d("LoginActivity", "result OK!");
             Intent in = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(in);
@@ -141,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         //저장이 안되어있다면, 즉 프로필을 제대로 생성하지 않았다면
-        else{
+        else {
             //do nothing.
             Log.d("LoginActivity", "result CANCELED");
         }
@@ -152,24 +150,21 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-
     //msg를 파싱해서 원하는 것만
-    static private void saveProfileToStaticManager(String msg){
+    static private void saveProfileToStaticManager(String msg) {
         DataSaver dataSaver = new DataSaver();
 
         StringTokenizer token = new StringTokenizer(msg, " ");
 
         //StaticManager에 저장하여 다른 곳에서도 이용할 수 있도록 함.
-        StaticManager.nickname=token.nextToken();
-        if(token.nextToken().equals("f")) StaticManager.sex=false;
-        else StaticManager.sex=true;
-        StaticManager.comment=token.nextToken();
-        StaticManager.checkIfSMHasProfile=true; //저장했으므로 true;
-
+        StaticManager.nickname = token.nextToken();
+        if (token.nextToken().equals("f")) StaticManager.sex = false;
+        else StaticManager.sex = true;
+        StaticManager.comment="";
+        while(token.hasMoreTokens()) //space 기준으로 토큰을 만드니까, 코멘트에 space가 있을 때는 모두 붙여줌.
+            StaticManager.comment += token.nextToken()+" ";
+        StaticManager.checkIfSMHasProfile = true; //저장했으므로 true;
     }
-
-
-
 
     public void onResume() {
         super.onResume();

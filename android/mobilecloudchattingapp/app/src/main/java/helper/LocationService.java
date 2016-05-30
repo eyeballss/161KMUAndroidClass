@@ -2,13 +2,18 @@ package helper;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 
@@ -66,6 +71,34 @@ public class LocationService {
 //        alert.show();
 //    }
 //    참고 : http://stackoverflow.com/questions/843675/how-do-i-find-out-if-the-gps-of-an-android-device-is-enabled
+
+    //GPS onoff에 따라 GPS를 켜고 끄기 대화상자를 열어주는 메소드. 이것도 위와 마찬가지로... 아마도 퍼미션 문제가 있으리라 생각함.
+    public void enableGPSSetting(boolean gpsEnabled){
+        ContentResolver res = StaticManager.applicationContext.getContentResolver();
+
+//        boolean gpsEnabled =StaticManager.locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if(!gpsEnabled){
+            new AlertDialog.Builder(StaticManager.applicationContext)
+                    .setTitle("GPS Setting")
+                    .setMessage("GPS is off. \n Want turn it on?")
+                    .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            StaticManager.applicationContext.startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+
+                    .show();
+
+
+        }//if
+    }
 
 
     public void requestGPS() {

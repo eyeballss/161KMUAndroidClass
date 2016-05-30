@@ -43,21 +43,25 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         dataSaver = new DataSaver();
-
     }
 
     //뷰들을 StaticManager에서 따와서 세팅함.
     private void setViews() {
         nicknameEditTxt.setText(StaticManager.nickname);
         commentEditTxt.setText(StaticManager.comment);
-        if(StaticManager.sex) radioWomanBtn.setChecked(true);
-        else radioManBtn.setChecked(true);
+        if(StaticManager.sex) radioManBtn.setChecked(true);
+        else radioWomanBtn.setChecked(true);
+        StaticManager.checkIfSMHasProfile=true;
     }
 
     //닉네임과 sex 여부 체크하고 코멘트는 괜찮음.
     public void saveProfileBtnOnClick(View v){
         if(nicknameEditTxt.getText().toString().matches("")){ //닉네임이 정해져 있지 않으면
             StaticManager.testToastMsg("fill your nickname");
+            return;
+        }
+        if(nicknameEditTxt.getText().toString().contains(" ")){ //닉네임에 스페이스가 있으면
+            StaticManager.testToastMsg("can't include empty space in id");
             return;
         }
         StaticManager.nickname=nicknameEditTxt.getText().toString();//닉네임 저장

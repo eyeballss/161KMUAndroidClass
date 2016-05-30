@@ -57,7 +57,7 @@ public class ListViewAdapter_MainTab1 extends BaseAdapter
 
         if (convertView == null)
         {
-            convertView = inflater.inflate(R.layout.list_main_tab1, null); //여기서 인플레이터, 즉 객체화.
+            convertView = inflater.inflate(R.layout.list_main_tab1_items, null); //여기서 인플레이터, 즉 객체화.
             holder = new ViewHolder();
             holder.txtViewTitle = (TextView) convertView.findViewById(R.id.textView1);
             holder.txtViewDescription = (TextView) convertView.findViewById(R.id.textView2);
