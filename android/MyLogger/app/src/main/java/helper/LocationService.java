@@ -107,7 +107,7 @@ public class LocationService {
 
     public void requestGPS() {
 
-        long minTime = 1000; //이 시간(1000ms= 1초)이 지나면 GPS를 업데이트 해주세요.
+        long minTime = 500; //이 시간(500ms= 0.5초)이 지나면 GPS를 업데이트 해주세요.
         float minDistance = 0; //내가 이만큼(0이면 항상) 움직이면 업데이트 해주세요.
 
         try {

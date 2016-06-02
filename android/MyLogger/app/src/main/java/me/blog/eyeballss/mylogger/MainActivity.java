@@ -9,11 +9,16 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
 
 import helper.LocationService;
 import helper.StaticManager;
@@ -22,23 +27,36 @@ public class MainActivity extends AppCompatActivity {
 
     private GoogleMap map;
     private LocationService locationService;
+    private ListView activityListView;
+    private Button registerBtn;
+    private ListViewAdapter listViewAdapter;
+
+    ArrayList<String> datas;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         //스태틱 매니저 세팅
-        StaticManager.applicationContext = getApplicationContext(); //어플리케이션 콘텍스트 넘김.
-        StaticManager.locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);//위치매니저 넘김.
-        locationService = new LocationService();
-        locationService.startLocationService(); //GPS 서비스 곧 바로 시작.
+        settingStaticManager();
 
-        SupportMapFragment fragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-        map = fragment.getMap();
+        //지도 세팅
+        settingMap();
+
+        //뷰 객체 가져오기
+        settingViews();
+
+        //리스트뷰 세팅
+        settingListView();
 
 
 
     }
 
+    public void registerBtnClick(View v){
+        datas.add("click!");
+        listViewAdapter.notifyDataSetChanged();
+    }
 
     private void recodeGPS() {
         //gps 받아서 레코딩 함.
@@ -76,6 +94,31 @@ public class MainActivity extends AppCompatActivity {
         }
     };//mLocalBroadcastReceiver
 
+
+
+    private void settingListView(){
+        datas = new ArrayList<String>();
+
+        listViewAdapter = new ListViewAdapter(this, datas);
+        activityListView.setAdapter(listViewAdapter);
+    }
+
+    private void settingViews(){
+        registerBtn = (Button)findViewById(R.id.registerBtn);
+        activityListView = (ListView)findViewById(R.id.activityListView);
+    }
+
+    private void settingMap(){
+        SupportMapFragment fragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+        map = fragment.getMap();
+    }
+
+    private void settingStaticManager() {
+        StaticManager.applicationContext = getApplicationContext(); //어플리케이션 콘텍스트 넘김.
+        StaticManager.locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);//위치매니저 넘김.
+        locationService = new LocationService();
+        locationService.startLocationService(); //GPS 서비스 곧 바로 시작.
+    }
 
     public void onResume() {
         super.onResume();
