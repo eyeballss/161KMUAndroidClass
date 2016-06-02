@@ -141,6 +141,14 @@ public class MainActivity extends AppCompatActivity {
         Log.d("MainActivity", comment + "를 띄움");
     }
 
+    public void startBtnClick(View v) {
+        locationService.requestGPS();
+    }
+
+    public void stopBtnClick(View v) {
+        locationService.stopGPS(this);
+    }
+
     private void dialog(){
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
