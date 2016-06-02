@@ -18,6 +18,7 @@ public class StaticManager {
     private static boolean singleton=false;
     public static Context applicationContext;
     public static LocationManager locationManager;
+    public static String ipAddress="52.79.106.222"; //IP 주소
 
     //로컬 브로드캐스트
     public static void sendBroadcast(String key, String data) {
