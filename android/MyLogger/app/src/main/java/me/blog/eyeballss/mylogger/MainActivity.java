@@ -31,7 +31,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 
+import helper.HttpConnection;
 import helper.LocationService;
 import helper.StaticManager;
 
@@ -46,11 +48,13 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> listDatas;
     HashMap<Integer, ActivityLocation> registeredActivities;
     private double myLatitude=0.0, myLongitude=0.0;
-    private static int counter=0;
+//    private int counter;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        counter=0;
+
 
         //스태틱 매니저 세팅
         settingStaticManager();
@@ -64,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         //리스트뷰 세팅
         settingListView();
 
+        //데이터베이스에서 데이터 가져옴.
+        requestGetDataFromServer();
 
         //리스트뷰를 아이템 하나를 클릭하면
         activityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -71,13 +77,55 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 //해당 위치로 카메라를 돌림. 이거 계속 내 현재위치 따라다니니까, 고쳐야 함.
-                LatLng curPoint = new LatLng(registeredActivities.get(position).getLatitude(),
-                        registeredActivities.get(position).getLongitude()); //double형으로 la, lo을 LatLng 객체에 넣음
+                listViewAdapter.show();
+                Log.d("MainActivity", position+"번의 "+listViewAdapter.getText(position)+"을 따라갑니다.");
+                LatLng curPoint = new LatLng(registeredActivities.get(listViewAdapter.getText(position).hashCode()).getLatitude(),
+                        registeredActivities.get(listViewAdapter.getText(position).hashCode()).getLongitude()); //double형으로 la, lo을 LatLng 객체에 넣음
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 15)); //확대를 15만큼 합니다.
 
             }
-        });
+        });//setOnTiemClickListener
 
+
+        SwipeDismissListViewTouchListener touchListener =
+                new SwipeDismissListViewTouchListener(
+                        activityListView,
+                        new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                            @Override
+                            public boolean canDismiss(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    deleteDataInList(position);
+
+                                }
+                                listViewAdapter.notifyDataSetChanged();
+                            }
+                        });//touchListener
+
+        activityListView.setOnTouchListener(touchListener);
+        activityListView.setOnScrollListener(touchListener.makeScrollListener());
+
+    }
+
+    private void deleteDataInList(int position){
+        listViewAdapter.show();
+//        counter--;
+
+        String[] key = {"indx"};
+        String[] val = {
+                String.valueOf(listViewAdapter.getText(position).hashCode()),
+        };
+        Log.d("MainActivity", position + "번의 " + listViewAdapter.getText(position).hashCode() + "가 사라집니다.");
+        HttpConnection httpConnection = new HttpConnection();
+        httpConnection.connect("http://" + StaticManager.ipAddress + "/eyeballs/mylogger_del.php", "mylogger_del", key, val);
+
+        registeredActivities.remove(listViewAdapter.getText(position).hashCode());
+        listViewAdapter.remove((Integer) listViewAdapter.getItem(position));
+        listViewAdapter.show();
     }
 
     //등록 버튼을 누르면 세 가지를 해야 함.
@@ -91,22 +139,7 @@ public class MainActivity extends AppCompatActivity {
         //1. 다이얼로그 띄워서 아이콘 만들기
         dialog();
         Log.d("MainActivity", comment + "를 띄움");
-        //3. 디비에 넣기
     }
-
-    private void recodeGPS() {
-        //gps 받아서 레코딩 함.
-        boolean gps = StaticManager.locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (gps) {
-            StaticManager.testToastMsg("Turn on the gps.\nOther people can see you now.");
-        } else {
-//            updateMyGPS("0 0"); //0으로 내 gps를 업데이트 함.
-            StaticManager.testToastMsg("Turn off the gps.\nOther people can't see you now.");
-
-        }
-    }
-
-
 
     private void dialog(){
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -125,12 +158,16 @@ public class MainActivity extends AppCompatActivity {
                 comment = input.getText().toString();
 
                 //현재 위치를 지도에 아이콘을 추가함
-                addIconOnMap(myLatitude, myLongitude, comment);
+                addIconOnMap(myLatitude, myLongitude, time, comment);
                 //2. 리스트에 넣기
-                listDatas.add(time+"\n "+comment);
+                String temp = time + "\n " + comment;
+                addIntoListView(temp);
                 //등록도 함.
-                registeredActivities.put(counter++, new ActivityLocation(myLatitude, myLongitude));
-                listViewAdapter.notifyDataSetChanged();
+                registeredActivities.put(temp.hashCode(),new ActivityLocation(myLatitude, myLongitude));
+
+                //3.디비에 넣기
+                storeDataIntoServer();
+
             }
         });
 
@@ -145,7 +182,37 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void addIconOnMap(Double latitude, Double longitude, String snippet){
+    //리스트뷰에 넣기
+    private void addIntoListView(String str){
+        listDatas.add(str);
+        listViewAdapter.notifyDataSetChanged();
+    }
+
+    //디비에 저장
+    private void storeDataIntoServer(){
+        String[] key = {"indx", "text", "latitude", "longitude"};
+        String[] val = {
+                String.valueOf((time+"\n "+comment).hashCode()),
+                time+"\n "+comment,
+                String.valueOf(myLatitude),
+                String.valueOf(myLongitude)
+        };
+        HttpConnection httpConnection = new HttpConnection();
+        httpConnection.connect("http://" + StaticManager.ipAddress + "/eyeballs/mylogger_set.php", "mylogger_set", key, val);
+
+        //그 후에 카운터 함.
+//        counter++;
+    }
+
+    //디비에서 불러옴
+    private void requestGetDataFromServer(){
+        String[] key = {};
+        String[] val = {};
+        HttpConnection httpConnection = new HttpConnection();
+        httpConnection.connect("http://" + StaticManager.ipAddress + "/eyeballs/mylogger_get.php", "mylogger_get", key, val);
+    }
+
+    private void addIconOnMap(Double latitude, Double longitude, String time, String snippet){
 
         MarkerOptions marker = new MarkerOptions();
         marker.position(new LatLng(latitude, longitude));
@@ -153,7 +220,6 @@ public class MainActivity extends AppCompatActivity {
         marker.snippet(snippet);
         marker.draggable(true);
         marker.icon(BitmapDescriptorFactory.fromResource(android.R.drawable.star_on));
-
         map.addMarker(marker);
 
     }
@@ -183,10 +249,43 @@ public class MainActivity extends AppCompatActivity {
                 map.setMapType(GoogleMap.MAP_TYPE_NORMAL); //맵의 타입을 정함. 위성인지 항공인지 등
 
             }
+            //디비에서 받아온 것
+            message = intent.getStringExtra("mylogger_get");
+            if(message!=null){
+                parser(message);
+            }
 
         }
     };//mLocalBroadcastReceiver
 
+    private void parser(String message){
+        StringTokenizer token= new StringTokenizer(message, "*");
+        while(token.hasMoreTokens()){
+
+            token.nextToken(); //첫번째 토큰은 인덱스이므로 그냥 넘어감
+            String temp = token.nextToken().toString();
+            Log.d("MainActivity", "temp : " + temp);
+            addIntoListView(temp); //두번째 토큰은 리스트뷰에 넣기
+            double latitude = Double.valueOf(token.nextToken()); //서너번째 토큰은 la, lo이므로 double에 넣음
+            double longitude = Double.valueOf(token.nextToken());
+            Log.d("MainActivity", "la : "+ latitude+" lo : "+longitude);
+
+            //아이콘 등록
+            StringTokenizer tempToken= new StringTokenizer(temp, " ");
+            String time = tempToken.nextToken()+" "+tempToken.nextToken();
+            Log.d("MainActivity", "time : "+ time);
+            String snippet ="";
+            while(tempToken.hasMoreTokens()) snippet+=tempToken.nextToken()+" ";
+            Log.d("MainActivity", "snippet : "+ snippet);
+            addIconOnMap(latitude, longitude, time, snippet);
+
+            //registeredActivities에도 등록
+            registeredActivities.put(temp.hashCode(), new ActivityLocation(latitude, longitude));
+
+            //한 덩어리가 끝나야 카운터를 올림.
+//            counter++;
+        }
+    }
 
 
 

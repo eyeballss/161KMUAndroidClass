@@ -1,6 +1,7 @@
 package me.blog.eyeballss.mylogger;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,20 @@ public class ListViewAdapter extends BaseAdapter {
         this.datas = datas;
     }
 
+    public void remove(int position){
+        datas.remove(position);
+    }
+
+    public String getText(int position){
+        return datas.get(position).toString();
+    }
+
+    public void show(){
+        for(int i=0; i<datas.size(); i++){
+            Log.d("ListViewAdapter", i+"번째 데이터는 "+datas.get(i));
+        }
+    }
+
     @Override
     public int getCount() {
         return datas.size();
@@ -30,7 +45,7 @@ public class ListViewAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return position;
     }
 
     @Override
