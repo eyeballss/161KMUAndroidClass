@@ -153,8 +153,8 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         //시간을 구해 먼저 넣습니다.
-        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy.mm.dd hh:mm:ss");
-        time = dayTime.format(new Date(System.currentTimeMillis()));
+        SimpleDateFormat sdfNow1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        time = sdfNow1.format(new Date(System.currentTimeMillis()));
 
         alert.setTitle("활동 기록 " + time);
         final EditText input = new EditText(this); //에딧텍스트
