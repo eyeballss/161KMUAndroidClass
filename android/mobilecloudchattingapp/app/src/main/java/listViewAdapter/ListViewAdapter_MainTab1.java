@@ -41,7 +41,7 @@ public class ListViewAdapter_MainTab1 extends BaseAdapter
 
     public long getItemId(int position) {
         // TODO Auto-generated method stub
-        return 0;
+        return position;
     }
 
     private class ViewHolder {

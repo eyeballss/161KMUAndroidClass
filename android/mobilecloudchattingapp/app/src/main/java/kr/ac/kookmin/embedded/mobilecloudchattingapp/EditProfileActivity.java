@@ -95,20 +95,23 @@ public class EditProfileActivity extends AppCompatActivity {
 
         Log.d("EditProfileActivity", "push Back Btn");
 
-        //makeProfile ==true && whereicame로그인 실패로 옴 : 다 만들고 Back 눌러서 나가면
-        if(StaticManager.checkIfSMHasProfile && whereicame==false){
-            saveProfileIntoServer();//디비를 저장하고
-            setResult(RESULT_OK, intent); //OK라고 말해줌.
-            Log.d("EditProfileActivity", "login fail result OK");
+        if(StaticManager.checkIfSMHasProfile) {
+
+            //makeProfile ==true && whereicame로그인 실패로 옴 : 다 만들고 Back 눌러서 나가면
+            if (whereicame) {
+                editProfileInServer(); //디비에 수정.
+                setResult(RESULT_OK, intent);
+                Log.d("EditProfileActivity", "edit profile result OK");
+            }
+            //makeProfile ==true && whereicame edit을 하기 위해 옴 : 어찌저찌 채우고 Back 눌러 나가면
+            else{
+                saveProfileIntoServer();//디비를 저장하고
+                setResult(RESULT_OK, intent); //OK라고 말해줌.
+                Log.d("EditProfileActivity", "login fail result OK");
+            }
         }
-        //makeProfile ==true && whereicame edit을 하기 위해 옴 : 어찌저찌 채우고 Back 눌러 나가면
-        else if(StaticManager.checkIfSMHasProfile && whereicame==true){
-            editProfileInServer(); //디비에 수정.
-            setResult(RESULT_OK, intent);
-            Log.d("EditProfileActivity", "edit profile result OK");
-        }
-            //makeProfiel==false : 만들던 중간에 Back 눌러서 나가면
-        else if(!StaticManager.checkIfSMHasProfile){
+        //makeProfiel==false : 만들던 중간에 Back 눌러서 나가면
+        else{
             setResult(RESULT_CANCELED, intent); //취소가 되었다고 말해줌.
             Log.d("EditProfileActivity", "result CANCLE");
         }

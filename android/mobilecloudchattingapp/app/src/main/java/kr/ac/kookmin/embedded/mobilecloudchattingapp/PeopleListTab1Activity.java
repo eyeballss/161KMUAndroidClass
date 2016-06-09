@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,8 +37,10 @@ public class PeopleListTab1Activity extends LinearLayout {
     ArrayList<String> name; //리스트에 들어가는 데이터
     ArrayList<String> distance; //리스트에 들어가는 데이터
     Context context;
+    SwipeRefreshLayout swipeRefreshLayout; //당기면 새로고치는 레이아웃
 
     HashMap<String, String> dataMap = new HashMap<String, String>();
+    HashMap<String, String> nicknameMap = new HashMap<String, String>();
 
     //여기서 이 레이아웃이 할 일을 지정함.
     private void work(final Context context) {
@@ -49,9 +52,49 @@ public class PeopleListTab1Activity extends LinearLayout {
 
         //사람들 정보를 받아옴.
         getPeopleData(context);
+        //리스트뷰 세팅
+        listViewSetting();
+        //리스너들 불러옴.
+        setListners();
 
     }//work
 
+    private void setListners(){
+
+        //당겨서 새로고침
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                getPeopleData(context);
+                Log.d("PeopleListTab1Activity", "refresh starts listView");
+
+
+            }
+        });
+        //리스트뷰의 아이템을 클릭하면..!
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
+                Log.d("PeopleListTab1Activity", "[" + name.get(position).toString() + "]의 \n[" + dataMap.get(nicknameMap.get(name.get(position).toString()).toString()) + "]을 받음");
+
+                StringTokenizer token = new StringTokenizer(dataMap.get(nicknameMap.get(name.get(position).toString()).toString()), "*");
+                String nickname = token.nextToken();
+                String sex = token.nextToken();
+                String comment = token.nextToken();
+
+                String msg =
+                        "name : \n" + nickname + "\n" +
+                                "distance : \n" + distance.get(position) + "\n" +
+                                "sex : " + sex + "\n" +
+                                "comment : " + comment + "\n\n" +
+                                "do you want to chat?\n";
+                Message.yesNoMsgShow(msg, "chatting_dialog", name.get(position), "no", context);
+            }
+        });
+    }
 
     //사람들 정보를 받음
     private void getPeopleData(Context context) {
@@ -70,16 +113,20 @@ public class PeopleListTab1Activity extends LinearLayout {
     private BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            Log.d("PeopleListTab1Activity", "브로드캐스트 리시버 call");
             message = intent.getStringExtra("chatting_dialog");
+            Log.d("PeopleListTab1Activity", "chatting_dialog에서 브로드캐스트 리시브");
+
             if (message != null) {
                 if (message.equals("no")) {
                     StaticManager.testToastMsg("싫구나..");
                 } else {
                     StaticManager.testToastMsg(message + "랑 대화하자!");
 
+                    Log.d("PeopleListTab1Activity", message + "랑 대화합니다.");
                     Intent in = new Intent(context, ChattingActivity.class);
                     in.putExtra("oppoNickname", message);
+                    in.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(in); //이쪽으로 가서 채팅.
 
@@ -87,22 +134,22 @@ public class PeopleListTab1Activity extends LinearLayout {
             }
             //사람들 정보를 받음
             message = intent.getStringExtra("db_getProfile.php");
+            Log.d("PeopleListTab1Activity", "db_getProfile.php에서 브로드캐스트 리시브");
             if (message != null) {
-                listViewSetting(message);
+                dataParser(message);
             }
 
 
-            LocalBroadcastManager.getInstance(context).unregisterReceiver(mLocalBroadcastReceiver);
+//            LocalBroadcastManager.getInstance(context).unregisterReceiver(mLocalBroadcastReceiver);
             Log.d("LoginActivity", "local broadcast receiver works");
         }
     };
 
 
     //사람들 정보를 받아오면 여기서 리스트에 올라가게 됨. 맨 처음 나오는 두 값이 내 좌표값.
-    private void listViewSetting(String data) {
-
+    private void listViewSetting() {
+//        LocalBroadcastManager.getInstance(context).registerReceiver(mLocalBroadcastReceiver, new IntentFilter("localBroadCast"));
         //받아온 사람들 정보를 파싱함. 파싱한 값은 name과 distance arrayList에 들어감
-        dataParser(data);
 
 
         //아래는 리스트뷰 세팅---------------
@@ -111,24 +158,7 @@ public class PeopleListTab1Activity extends LinearLayout {
         listViewAdapterMainTab1 = new ListViewAdapter_MainTab1((Activity) context, name, distance);
         //리스트뷰는 단지 보여주는 역할만 할 뿐.
         listView.setAdapter(listViewAdapterMainTab1);
-        //리스트뷰의 아이템을 클릭하면..!!!!
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                StringTokenizer token = new StringTokenizer(dataMap.get(name.get(position).toString()), "*");
-                String nickname = token.nextToken();
-                String sex = token.nextToken();
-                String comment = token.nextToken();
 
-                String msg =
-                        "name : \n" + nickname + "\n" +
-                                "distance : \n" + distance.get(position) + "\n\n" +
-                                "sex : " + sex +"\n"+
-                                "comment : " + comment + "\n\n" +
-                                "do you want to chat?\n";
-                Message.yesNoMsgShow(msg, "chatting_dialog", name.get(position), "no", context);
-            }
-        });
 
     }
 
@@ -139,17 +169,21 @@ public class PeopleListTab1Activity extends LinearLayout {
         dataMap.clear(); //데이터맵 싹 지움
         name.clear(); //네임 싹 지움
         distance.clear(); //거리 싹 지움 초 기 화!
+        nicknameMap.clear(); //닉네임-idpw 맵 싹 지움
+        listViewAdapterMainTab1.notifyDataSetChanged();
         StringTokenizer token = new StringTokenizer(data, "*");
 
         while (token.hasMoreTokens()) {
             String idpw = token.nextToken();
-            String nickname_sex_comment = token.nextToken() + "*" + token.nextToken() + "*" + token.nextToken();
+            String nickname = token.nextToken();
+            String nickname_sex_comment = nickname + "*" + token.nextToken() + "*" + token.nextToken();
             String temp = token.nextToken();
             Double dis = Double.valueOf(temp.substring(0, temp.indexOf(".")+5));
 
             //map과 dataMap에 각각 idpw를 키로 두고 데이터를 넣음.
             map.put(idpw, dis);
             dataMap.put(idpw, nickname_sex_comment);
+            nicknameMap.put(nickname, idpw);
             Log.d("PeopleListTab1Activity", "idpw:" + idpw + " nickname_sex_comment:" + nickname_sex_comment + " dis:" + dis);
 
         }//while
@@ -167,9 +201,17 @@ public class PeopleListTab1Activity extends LinearLayout {
             Log.d("PeopleListTab1Activity", "name:" + temp + " distance:" + map.get(temp));
 //            System.out.println(temp + " = " + map.get(temp));
         }
+
+
+
+        finishRefreshing();
     }
 
-
+    private void finishRefreshing(){
+        listViewAdapterMainTab1.notifyDataSetChanged();
+        swipeRefreshLayout.setRefreshing(false);
+        Log.d("PeopleListTab1Activity", "refresh finishs listView");
+    }
 
 
 
@@ -199,9 +241,12 @@ public class PeopleListTab1Activity extends LinearLayout {
 
             //첫번째 : xml 파일, 두번째: 가서 붙을 곳, 세번째 : t면 바로 붙고 f면 필요할 때 붙음.
             rootView = inflater.inflate(R.layout.fragment_main_tab1, this, true);
+            swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.layout);
             work(context);
             Log.d("PeopleTab1", "init call");
             singleton = true;
+
+
         }
     }
 

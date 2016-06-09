@@ -10,6 +10,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -21,13 +22,16 @@ import helper.StaticManager;
 
 /**
  * Don't forget:
- * - makeing Log at method
+ * - making Log at method
  * - TDD
- * - makeing flow chart
+ * - making flow chart
  * - naming rule
  * - access modifier
  * - exception
  * - comments (//)
+ * - make it shorter
+ * - package name
+ * - authority, private is default
  */
 
 
@@ -39,12 +43,13 @@ import helper.StaticManager;
 public class LoginActivity extends AppCompatActivity {
 
 
-    EditText idEditTxt, pwEditTxt;
-    Button loginBtn;
+    private EditText idEditTxt, pwEditTxt;
+    private Button loginBtn;
     private static int idpwHashCode;
     static HttpConnection httpConnection;
 
     protected void onCreate(Bundle savedInstanceState) {
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//타이틀바 없애기
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_login);
 
@@ -96,12 +101,12 @@ public class LoginActivity extends AppCompatActivity {
 
 
     //서버에서 가져온 값을 알려주는 브로드캐스트 리시버
-    private BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
+    public BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // db_login.php로 보낸 결과값을 여기서 받음.
             final String message = intent.getStringExtra("db_login.php");
-
+            test2(message);
             Intent in;
             if (message.equals("false")) { //로그인에 실패하면 바로 가입을 위해 EidtProfileActivity로 이동
                 in = new Intent(LoginActivity.this, EditProfileActivity.class);
@@ -113,6 +118,7 @@ public class LoginActivity extends AppCompatActivity {
                 in = new Intent(LoginActivity.this, MainActivity.class);
                 saveProfileToStaticManager(message); //로그인 성공이므로 profile 데이터를 핸드폰에 저장함.
                 startActivity(in);
+
                 finish(); //로그인 하고 나면 로그인창은 닫습니다.
             }
 
@@ -121,6 +127,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     };
 
+    public String test2(String msg){return msg;}
 
     //profile 만든 후에 제대로 저장하면 OK 아니면 FALSE
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -130,7 +137,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Log.d("LoginActivity", "onActivityResult call");
         //저장이 되어있다면, 즉 프로필을 제대로 생성했다면
-        if (StaticManager.checkIfSMHasProfile && resultCode == RESULT_OK) {
+        if (StaticManager.checkIfSMHasProfile) {
             Log.d("LoginActivity", "result OK!");
             Intent in = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(in);
@@ -149,9 +156,9 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-
+    String testString;
     //msg를 파싱해서 원하는 것만
-    static private void saveProfileToStaticManager(String msg) {
+    private void saveProfileToStaticManager(String msg) {
         DataSaver dataSaver = new DataSaver();
 
         StringTokenizer token = new StringTokenizer(msg, " ");
@@ -164,6 +171,14 @@ public class LoginActivity extends AppCompatActivity {
         while(token.hasMoreTokens()) //space 기준으로 토큰을 만드니까, 코멘트에 space가 있을 때는 모두 붙여줌.
             StaticManager.comment += token.nextToken()+" ";
         StaticManager.checkIfSMHasProfile = true; //저장했으므로 true;
+    }
+
+    public void callSaveProfileToStaticManager(String msg){
+        saveProfileToStaticManager(msg);
+    }
+
+    public View getLoginBtn(){
+        return loginBtn;
     }
 
     public void onResume() {

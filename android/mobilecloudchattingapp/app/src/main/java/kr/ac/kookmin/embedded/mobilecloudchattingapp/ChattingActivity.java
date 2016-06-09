@@ -1,12 +1,17 @@
 package kr.ac.kookmin.embedded.mobilecloudchattingapp;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,6 +22,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import helper.HttpConnection;
 import helper.StaticManager;
 
 public class ChattingActivity extends AppCompatActivity {
@@ -24,6 +30,7 @@ public class ChattingActivity extends AppCompatActivity {
     Button sendBtn;
     EditText editxtForChat;
     String oppoNickname; //상대방 닉네임.
+    String myNickname = StaticManager.nickname; //나의 닉네임
     Intent intent;
     Handler handler;
 
@@ -31,6 +38,7 @@ public class ChattingActivity extends AppCompatActivity {
     Socket socket;
     ClientReceiver clientReceiver;
     ClientSender clientSender;
+    StartNetwork startNetwork;
 
     //아래는 채팅 리스트
     ListView mChattingList;
@@ -38,6 +46,7 @@ public class ChattingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);//타이틀바 없애기
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_chatting);
 
@@ -56,15 +65,58 @@ public class ChattingActivity extends AppCompatActivity {
         mChattingList.setAdapter(mChattingAdapter);
 
         //채팅 쓰레드 시작
-        StartNetwork startNetwork = new StartNetwork();
+        startNetwork = new StartNetwork();
         startNetwork.start();
 
+        initializeChatRequest();
     }
 
 //    public void chattingSendOnClick(View v) {
 //        mChattingAdapter.add(editxtForChat.getText().toString());
 //        editxtForChat.setText("");
 //    }
+
+
+    private void initializeChatRequest(){
+
+        String[] key = {
+                "sender",
+                "receiver",
+        };
+        String[] val = {
+                oppoNickname,
+                myNickname,
+        };
+        HttpConnection httpConnection = new HttpConnection();
+        httpConnection.connect("http://" + StaticManager.ipAddress + "/eyeballs/db_getChat.php", "db_getChat.php", key, val);
+
+    }
+    //서버에서 가져온 값을 알려주는 브로드캐스트 리시버
+    public BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // db_login.php로 보낸 결과값을 여기서 받음.
+            final String message = intent.getStringExtra("db_getChat.php");
+
+            메세지 받은게 hello*abc*hello*abc*hello*hello*hello*abc*LLLLLLLLL*hello*abc*LLLLLLLLL* 이렇게 오니까
+                    파싱해야 함
+            if (message != null) {
+                if(!message.trim().equals("")) {
+                    handler.post(new Runnable() { //VIEW 들을 만져줌.
+                        public void run() {
+                            mChattingAdapter.add(message); //채팅창에 올리고
+                        }
+                    });
+                }
+            }
+
+            Log.d("ChattingActivity", "local broadcast receiver works");
+        }
+    };
+
+
+
+
 
 
 //아래는 채팅 쓰레드
@@ -99,6 +151,7 @@ public class ChattingActivity extends AppCompatActivity {
             }
         }
     }
+
 
     public class ClientSender extends Thread {
         Socket socket;
@@ -145,10 +198,8 @@ public class ChattingActivity extends AppCompatActivity {
 //                            System.exit(0);
                         try {
                             Log.d("Chatting activity", "startNetwork ready to send");
-                            StaticManager.testToastMsg("startNetwork ready to send");
                             write(msg); //서버로 보내고
                             Log.d("Chatting activity", "msg for Server : " + msg);
-                            StaticManager.testToastMsg("msg for Server : " + msg);
 
                                     handler.post(new Runnable() { //VIEW 들을 만져줌.
                                         public void run() {
@@ -165,6 +216,13 @@ public class ChattingActivity extends AppCompatActivity {
 
 
             }
+        }
+
+        public void stopDataOutputStream(){
+            try{
+                output.close();
+                output=null;
+            }catch(Exception e){};
         }
     }
 
@@ -187,6 +245,7 @@ public class ChattingActivity extends AppCompatActivity {
             inputStr = null;
             while (input != null) {
                 try {
+                    //상대방으로부터 내용을 받아옴.
                     inputStr = input.readUTF();
 
                     Log.d("Chatting activity", "msg form Server : "+inputStr);
@@ -197,23 +256,53 @@ public class ChattingActivity extends AppCompatActivity {
                         }
                     });
 
+                    String[] key = {
+                            "sender",
+                            "receiver",
+                            "talk"
+                    };
+                    String[] val = {
+                            oppoNickname,
+                            myNickname,
+                            inputStr
+                    };
+
+                    HttpConnection httpConnection = new HttpConnection();
+                    httpConnection.connect("http://" + StaticManager.ipAddress + "/eyeballs/db_saveChat.php", "db_saveChat.php", key, val);
+
+
 
 //                    System.out.println(inputStr);
                 } catch (IOException e) {
                 }
             }
         }
+
+        public void stopDataInputStream(){
+            try{
+                input.close();
+                input=null;
+            }catch(Exception e){};
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocalBroadcastReceiver, new IntentFilter("localBroadCast"));
     }
 
     @Override
     protected void onPause() {
-        super.onStop();
         Log.d("chatting activity", "onPause method call");
 
         try {
             socket.close();
             socket=null;
+            startNetwork.interrupt();
+            clientReceiver.stopDataInputStream();
             clientReceiver.interrupt();
+            clientSender.stopDataOutputStream();
             clientSender.interrupt();
 
             Log.d("chatting activity", "socket and threads close");
@@ -221,6 +310,7 @@ public class ChattingActivity extends AppCompatActivity {
             Log.d("chatting activity", "socket close fail");
             e.printStackTrace();
         }
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocalBroadcastReceiver);
         super.onPause();
     }
 }

@@ -3,6 +3,7 @@ package helper;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 /**
  * Created by kesl on 2016-04-22.
@@ -31,6 +32,7 @@ public class Message {
             public void onClick(DialogInterface dialog, int which) {
                 // 'YES'누르면 yesKey, yesVal로 로컬브로드캐스트 함.
                 StaticManager.sendBroadcast(key, yesVal);
+                Log.d("Message", key+"을 기준으로 "+yesVal+"응답을 보내는 브로드캐스트를 함");
             }
         });
         alert_confirm.setNegativeButton("Cancle",
@@ -39,6 +41,7 @@ public class Message {
                     public void onClick(DialogInterface dialog, int which) {
                         // 'No' 누르면 noKey, noVal로 로컬브로드캐스트 함.
                         StaticManager.sendBroadcast(key, noVal);
+                        Log.d("Message", key + "을 기준으로 " + noVal + "응답을 보내는 브로드캐스트를 함");
                         return;
                     }
                 });

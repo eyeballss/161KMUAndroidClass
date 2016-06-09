@@ -138,8 +138,11 @@ public class LocationService {
 
     public void stopGPS(Context context) {
 
-        if ( ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
-            ActivityCompat.requestPermissions( (Activity)context, new String[] {  android.Manifest.permission.ACCESS_COARSE_LOCATION  }, 1);
+        if ( ContextCompat.checkSelfPermission( context,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION )
+                != PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions( (Activity)context, new String[] {
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION  }, 1);
         }
 
         manager.removeUpdates(gpsListener);
