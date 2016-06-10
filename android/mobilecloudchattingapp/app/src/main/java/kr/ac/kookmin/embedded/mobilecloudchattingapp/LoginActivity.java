@@ -32,6 +32,7 @@ import helper.StaticManager;
  * - make it shorter
  * - package name
  * - authority, private is default
+ * - size of editText
  */
 
 
