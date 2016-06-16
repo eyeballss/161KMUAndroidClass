@@ -23,27 +23,27 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
-import helper.HttpConnection.HttpConnection;
-import helper.StaticManager.StaticManager;
+import helper.HttpConnection;
+import helper.StaticManager;
 
 public class ChattingActivity extends AppCompatActivity {
 
-    private Button sendBtn;
-    private EditText editxtForChat;
-    private String oppoNickname; //상대방 닉네임.
-    private String myNickname = StaticManager.nickname; //나의 닉네임
-    private Intent intent;
-    private Handler handler;
+    Button sendBtn;
+    EditText editxtForChat;
+    String oppoNickname; //상대방 닉네임.
+    String myNickname = StaticManager.nickname; //나의 닉네임
+    Intent intent;
+    Handler handler;
 
     //서버 소켓
-    private Socket socket;
-    private ClientReceiver clientReceiver;
-    private ClientSender clientSender;
-    private StartNetwork startNetwork;
+    Socket socket;
+    ClientReceiver clientReceiver;
+    ClientSender clientSender;
+    StartNetwork startNetwork;
 
     //아래는 채팅 리스트
-    private ListView mChattingList;
-    private ArrayAdapter<String> mChattingAdapter; //이걸로 조종하면 됨.
+    ListView mChattingList;
+    ArrayAdapter<String> mChattingAdapter; //이걸로 조종하면 됨.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,15 +66,19 @@ public class ChattingActivity extends AppCompatActivity {
         mChattingList.setAdapter(mChattingAdapter);
 
         //채팅 쓰레드 시작
-        socket = new Socket();
-        startNetwork = new StartNetwork(socket);
+        startNetwork = new StartNetwork();
         startNetwork.start();
 
         initializeChatRequest();
-    }//onCreate
+    }
+
+//    public void chattingSendOnClick(View v) {
+//        mChattingAdapter.add(editxtForChat.getText().toString());
+//        editxtForChat.setText("");
+//    }
+
 
     private void initializeChatRequest() {
-        Log.d("ChattingActivity", "call initializeChatRequest()");
 
         String[] key = {
                 "sender",
@@ -93,7 +97,6 @@ public class ChattingActivity extends AppCompatActivity {
     public BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("ChattingActivity", "mLocalBroadcastReceiver");
             // db_login.php로 보낸 결과값을 여기서 받음.
             final String message = intent.getStringExtra("db_getChat.php");
 
@@ -104,34 +107,37 @@ public class ChattingActivity extends AppCompatActivity {
                 }
             }
 
-            Log.d("ChattingActivity", "local broadcast receiver is done");
+            Log.d("ChattingActivity", "local broadcast receiver works");
         }
-    };//mLocalBroadcastReceiver
+    };
 
     private void parser(String msg) {
-        Log.d("ChattingActivity", "call parser()");
         StringTokenizer token = new StringTokenizer(msg, "*");
         while (token.hasMoreTokens()) {
             loadOnChatList(token.nextToken());
         }
-    }//parser
+    }
 
-    public void loadOnChatList(final String msg) {
+
+    private void loadOnChatList(final String msg) {
         handler.post(new Runnable() { //VIEW 들을 만져줌.
             public void run() {
                 mChattingAdapter.add(msg); //채팅창에 올림
             }
         });
-        Log.d("ChattingActivity", "call loadOnChatList(). msg : "+msg);
-    }//loadOnChatList
+    }
 
-    //아래는 채팅 쓰레드
+
+//아래는 채팅 쓰레드
+
+
     public class StartNetwork extends Thread {
-        private Socket socket;
+//        private Socket socket;
+//        private String serverIp;
 
-        public StartNetwork(Socket socket) {
-            this.socket = socket;
-        }
+//        public StartNetwork(String ip) {
+//            serverIp = ip;
+//        }
 
         public void run() {
             try {
@@ -144,10 +150,12 @@ public class ChattingActivity extends AppCompatActivity {
                 clientReceiver.start();
                 clientSender.start();
             } catch (IOException e) {
+//            System.out.println("!!");
                 StaticManager.testToastMsg("network error!!!");
             }
         }
     }
+
 
     public class ClientSender extends Thread {
         Socket socket;
@@ -175,7 +183,12 @@ public class ChattingActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+//            Scanner sc = new Scanner(System.in);
+//            final String msg = {""};
+
             while (output != null) {
+
+                //                    msg = sc.nextLine();
 
                 //send 버튼을 누르면
                 sendBtn.setOnClickListener(new View.OnClickListener() {
@@ -184,9 +197,13 @@ public class ChattingActivity extends AppCompatActivity {
 
                         Log.d("Chatting activity", "startNetwork sendBtn clicked");
 
-                        if (!editxtForChat.getText().toString().trim().equals("")) {
+                        if(!editxtForChat.getText().toString().trim().equals("")){
                             //위에 있는게 정상적인 예제고 아래가 하드코딩 한 것
                             String msg = oppoNickname + "*" + editxtForChat.getText().toString();
+//                        String msg = "abc*" + editxtForChat.getText().toString();
+
+//                        if (msg.equals("exit"))
+//                            System.exit(0);
                             try {
                                 Log.d("Chatting activity", "startNetwork ready to send");
                                 write(msg); //서버로 보내고
@@ -218,12 +235,14 @@ public class ChattingActivity extends AppCompatActivity {
                 output = null;
             } catch (Exception e) {
             }
+            ;
         }
     }
 
     public class ClientReceiver extends Thread {
         Socket socket;
         DataInputStream input;
+        //        DataOutputStream output;
         String inputStr;
 
         public ClientReceiver(Socket socket) {
@@ -243,9 +262,11 @@ public class ChattingActivity extends AppCompatActivity {
                     inputStr = input.readUTF();
 
                     Log.d("Chatting activity", "msg form Server : " + inputStr);
+//                    StaticManager.sendBroadcast("dataFromChat", inputStr); //방송해도 되지만 여기선 그냥 핸들러로 처리함. 클래스로 만들면 방송하자.
+
                     loadOnChatList(oppoNickname + " : " + inputStr);//채팅창에 올림
 
-                    if (!inputStr.contains("is not here")) {
+                    if(!inputStr.contains("is not here")){
                         String[] key = {
                                 "sender",
                                 "receiver",
@@ -261,6 +282,8 @@ public class ChattingActivity extends AppCompatActivity {
                         httpConnection.connect("http://" + StaticManager.ipAddress + "/eyeballs/db_saveChat.php", "db_saveChat.php", key, val);
                     }
 
+
+//                    System.out.println(inputStr);
                 } catch (IOException e) {
                 }
             }
@@ -272,6 +295,7 @@ public class ChattingActivity extends AppCompatActivity {
                 input = null;
             } catch (Exception e) {
             }
+            ;
         }
     }
 
@@ -286,7 +310,7 @@ public class ChattingActivity extends AppCompatActivity {
         Log.d("chatting activity", "onPause method call");
 
         try {
-            if(socket!=null) socket.close();
+            socket.close();
             socket = null;
             startNetwork.interrupt();
             clientReceiver.stopDataInputStream();
